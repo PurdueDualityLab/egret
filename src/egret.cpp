@@ -23,6 +23,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdexcept>
 #include "Checker.h"
 #include "NFA.h"
 #include "ParseTree.h"
@@ -101,9 +102,7 @@ run_engine(string regex, string base_substring, bool check_mode = false, bool we
     if (stat_mode) stats.print();
   }
   catch (EgretException const &e) {
-    vector <string> result;
-    result.push_back(e.get_error());
-    return result;
+    throw std::runtime_error(e.get_error());
   }
 
   // Add alerts to front of list.
