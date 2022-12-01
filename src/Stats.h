@@ -23,6 +23,7 @@
 #define STATS_H
 
 #include <vector>
+#include <string>
 
 class Stats {
 

@@ -28,15 +28,18 @@
 #include "Path.h"
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
+#include "Stats.h"
 
 class TestGenerator {
 
 public:
   TestGenerator(std::vector<Path> p, std::set<char> m, bool d) {
-    paths = p;
-    punct_marks = m;
+    paths = std::move(p);
+    punct_marks = std::move(m);
     debug_mode = d;
+    num_gen_strings = 0;
   }
 
   // generate test strings
