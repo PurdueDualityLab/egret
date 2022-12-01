@@ -23,9 +23,7 @@
 #include "Path.h"
 #include "Edge.h"
 #include "Util.h"
-#include <iostream>
 #include <set>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -253,6 +251,8 @@ void Path::check_optional_braces() {
       case ']':
         opt_rbrace = true;
         opt_rbrace_loc = l;
+        break;
+      default:
         break;
       }
     } else {
@@ -554,8 +554,8 @@ std::string Path::gen_example_string(Location loc, char c, char except) {
       std::string except_str = std::string(1, except);
       if (sub == except_str) {
         if (edge->get_type() == CHAR_SET_EDGE) {
-          char c = edge->get_charset()->get_valid_character(except);
-          example += c;
+          char valid_char = edge->get_charset()->get_valid_character(except);
+          example += valid_char;
         } else {
           example += edge->get_substring();
         }
@@ -650,12 +650,11 @@ Path::gen_evil_strings(const std::set<char> &punct_marks) {
   std::vector<std::string> evil_strings;
 
   // add strings for interesting edges (char sets, strings, and loops)
-  for (int index : evil_edges) {
+  for (unsigned int index : evil_edges) {
     std::vector<std::string> new_strings =
         edges[index]->gen_evil_strings(test_string, punct_marks);
-    std::vector<std::string>::iterator tsi;
-    for (tsi = new_strings.begin(); tsi != new_strings.end(); tsi++) {
-      evil_strings.push_back(*tsi);
+    for (auto & new_string : new_strings) {
+      evil_strings.push_back(std::move(new_string));
     }
   }
   return evil_strings;

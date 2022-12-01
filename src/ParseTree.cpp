@@ -32,7 +32,6 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 
 //=============================================================
 // RD Parser
@@ -216,7 +215,7 @@ std::unique_ptr<ParseNode> ParseTree::group() {
   }
   scanner.advance();
 
-  // Determine if it a special use of parentheses
+  // Determine if it is a special use of parentheses
   if (scanner.get_type() == NO_GROUP_EXT) {
     normal_group = false;
     scanner.advance();
@@ -232,12 +231,10 @@ std::unique_ptr<ParseNode> ParseTree::group() {
   }
 
   // Assign the group number now before advancing scanner
-  int group_num;
+  int group_num = -1;
   if (normal_group) {
     group_num = group_count;
     group_count++;
-  } else {
-    group_num = -1;
   }
 
   // Get the group expression
@@ -627,7 +624,7 @@ void ParseTree::gather_stats(const std::unique_ptr<ParseNode> &node, ParseTreeSt
     tree_stats.repeat_nodes++;
     break;
   case GROUP_NODE:
-    if (node->group_name == "")
+    if (node->group_name.empty())
       tree_stats.unnamed_group_nodes++;
     else
       tree_stats.named_group_nodes++;

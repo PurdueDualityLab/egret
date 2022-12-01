@@ -82,10 +82,10 @@ public:
     regex_str = std::move(r);
     processed = false;
   }
-  Edge(EdgeType t, Location l, RegexLoop *r) {
+  Edge(EdgeType t, Location l, std::unique_ptr<RegexLoop> r) {
     type = t;
     loc = l;
-    regex_loop = r;
+    regex_loop = std::move(r);
     processed = false;
   }
   Edge(EdgeType t, Location l, std::unique_ptr<Backref> b) {
@@ -148,7 +148,7 @@ private:
   char character;         // character (for CHARACTER_EDGE)
   std::unique_ptr<CharSet> char_set;      // character set (for CHAR_SET_EDGE)
   std::unique_ptr<RegexString> regex_str; // regex string (for STRING_EDGE)
-  RegexLoop *regex_loop;  // regex loop (for BEGIN_LOOP_EDGE and END_LOOP_EDGE)
+  std::unique_ptr<RegexLoop> regex_loop;  // regex loop (for BEGIN_LOOP_EDGE and END_LOOP_EDGE)
   std::unique_ptr<Backref> backref;       // backreference (for BACKREFERENCE_EDGE)
 };
 

@@ -197,6 +197,8 @@ std::string Edge::fix_wild_punctuation(char c) const {
   case '^':
   case '-':
     char_str = "\\" + char_str;
+  default:
+    break;
   }
 
   std::string fixed_char_set;

@@ -111,7 +111,7 @@ NFA NFA::build_nfa_from_tree(std::unique_ptr<ParseNode> tree) {
     return build_nfa_char_set(std::move(tree));
 
   case IGNORED_NODE:
-    return build_nfa_ignored(std::move(tree));
+    return build_nfa_ignored();
 
   case BACKREFERENCE_NODE:
     return build_nfa_backreference(std::move(tree));
@@ -183,13 +183,14 @@ NFA NFA::build_nfa_repeat(std::unique_ptr<ParseNode> tree) {
 
   // create new loop
   // TODO refactor this
-  RegexLoop *regex_loop = new RegexLoop(repeat_lower, repeat_upper);
+  // RegexLoop *regex_loop = new RegexLoop(repeat_lower, repeat_upper);
+  auto regex_loop = std::make_unique<RegexLoop>(repeat_lower, repeat_upper);
 
   // Util new edges
   // Edge *edge = new Edge(BEGIN_LOOP_EDGE, tree->loc, regex_loop);
-  nfa.add_edge(0, nfa.initial, std::make_shared<Edge>(BEGIN_LOOP_EDGE, tree->loc, regex_loop)); // new initial to old initial
+  nfa.add_edge(0, nfa.initial, std::make_shared<Edge>(BEGIN_LOOP_EDGE, tree->loc, std::move(regex_loop))); // new initial to old initial
   // edge = new Edge(END_LOOP_EDGE, tree->loc, regex_loop);
-  nfa.add_edge(nfa.final, nfa.size - 1, std::make_shared<Edge>(END_LOOP_EDGE, tree->loc, regex_loop)); // old final to new final
+  nfa.add_edge(nfa.final, nfa.size - 1, std::make_shared<Edge>(END_LOOP_EDGE, tree->loc, std::move(regex_loop))); // old final to new final
 
   // update states
   nfa.initial = 0;
@@ -243,7 +244,7 @@ NFA NFA::build_nfa_char_set(std::unique_ptr<ParseNode> tree) {
   return nfa;
 }
 
-NFA NFA::build_nfa_ignored(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_ignored() {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   nfa.add_edge(0, 1, Edge::make_epsilon());
   return nfa;
@@ -264,7 +265,7 @@ void NFA::add_edge(unsigned int from, unsigned int to, const std::shared_ptr<Edg
   edge_table[from][to] = edge;
 }
 
-NFA NFA::concat_nfa(NFA nfa1, NFA nfa2) {
+NFA NFA::concat_nfa(const NFA& nfa1, NFA nfa2) {
   // How this is done: First will come nfa1, then nfa2 (its
   // initial state replaced with nfa1's final state)
 

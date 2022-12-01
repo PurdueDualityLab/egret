@@ -90,7 +90,7 @@ private:
   NFA build_nfa_char_set(std::unique_ptr<ParseNode> tree);
 
   // builds nfa with ignored element
-  NFA build_nfa_ignored(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_ignored();
 
   // builds nfa with backreference
   NFA build_nfa_backreference(std::unique_ptr<ParseNode> tree);
@@ -99,7 +99,7 @@ private:
   void add_edge(unsigned int from, unsigned int to, const std::shared_ptr<Edge> &edge);
 
   // concatenates two NFAs together
-  NFA concat_nfa(NFA nfa1, NFA nfa2);
+  NFA concat_nfa(const NFA& nfa1, NFA nfa2);
 
   // shift (renames) all the states in the NFA according to some (positive)
   // shift factor
