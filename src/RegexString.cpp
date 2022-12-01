@@ -19,28 +19,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "RegexString.h"
+#include <algorithm>
+#include <iostream>
 #include <set>
 #include <string>
-#include <iostream>
-#include <algorithm>
-#include "RegexString.h"
 
-void
-RegexString::gen_min_iter_string(std::string &min_iter_string)
-{
+void RegexString::gen_min_iter_string(std::string &min_iter_string) {
   if (repeat_lower != 0) {
     min_iter_string.append(get_substring());
   }
 }
 
-std::vector <std::string>
-RegexString::gen_evil_strings(const std::string& test_string, const std::set <char> &punct_marks)
-{
-  std::vector <std::string> evil_substrings; // set of evil substrings
+std::vector<std::string>
+RegexString::gen_evil_strings(const std::string &test_string,
+                              const std::set<char> &punct_marks) {
+  std::vector<std::string> evil_substrings; // set of evil substrings
 
   // create suffix: substring after the loop
   int start = prefix.size() + substring.size();
-    std::string suffix = test_string.substr(start);
+  std::string suffix = test_string.substr(start);
 
   // insert one letter strings
   evil_substrings.push_back("");
@@ -79,7 +77,7 @@ RegexString::gen_evil_strings(const std::string& test_string, const std::set <ch
   evil_substrings.push_back(all_upper);
   evil_substrings.push_back(all_lower);
   evil_substrings.push_back(mixed);
-  
+
   // insert strings for each punctation mark
   if (char_set->allows_punctuation()) {
     for (char punct_mark : punct_marks) {
@@ -89,19 +87,17 @@ RegexString::gen_evil_strings(const std::string& test_string, const std::set <ch
   }
 
   // generate the new full strings
-  std::vector <std::string> evil_strings;
-  std::vector <std::string>::iterator tsi;
+  std::vector<std::string> evil_strings;
+  std::vector<std::string>::iterator tsi;
   for (tsi = evil_substrings.begin(); tsi != evil_substrings.end(); tsi++) {
-      std::string new_string = prefix + *tsi + suffix;
+    std::string new_string = prefix + *tsi + suffix;
     evil_strings.push_back(new_string);
   }
 
   return evil_strings;
 }
 
-void
-RegexString::print()
-{
+void RegexString::print() {
   char_set->print();
 
   if (repeat_lower == 0 && repeat_upper == -1)

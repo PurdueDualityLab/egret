@@ -22,19 +22,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "NFA.h"
+#include "Edge.h"
+#include "ParseTree.h"
+#include "Util.h"
 #include <cassert>
 #include <iostream>
 #include <vector>
-#include "Edge.h"
-#include "NFA.h"
-#include "ParseTree.h"
-#include "Util.h"
 
 // TODO: No location information for epsilon edge.  OK?
 static Edge EPSILON = Edge(EPSILON_EDGE);
 
-NFA::NFA(unsigned int _size, unsigned int _initial, unsigned int  _final)
-{
+NFA::NFA(unsigned int _size, unsigned int _initial, unsigned int _final) {
   size = _size;
   initial = _initial;
   final = _final;
@@ -43,23 +42,20 @@ NFA::NFA(unsigned int _size, unsigned int _initial, unsigned int  _final)
   assert(final < size);
 
   // initialize edge table with an "empty graph"
-  std::vector <Edge *> empty_row(size, nullptr);
+  std::vector<Edge *> empty_row(size, nullptr);
   for (unsigned int i = 0; i < size; i++) {
     edge_table.push_back(empty_row);
   }
 }
 
-NFA::NFA(const NFA &other)
-{
+NFA::NFA(const NFA &other) {
   size = other.size;
   initial = other.initial;
   final = other.final;
   edge_table = other.edge_table;
 }
 
-NFA &
-NFA::operator=(const NFA & other)
-{
+NFA &NFA::operator=(const NFA &other) {
   if (this == &other)
     return *this;
 
@@ -71,9 +67,7 @@ NFA::operator=(const NFA & other)
   return *this;
 }
 
-void
-NFA::build(ParseTree &tree)
-{
+void NFA::build(ParseTree &tree) {
   // Build NFA
   NFA nfa = build_nfa_from_tree(tree.get_root());
 
@@ -84,9 +78,7 @@ NFA::build(ParseTree &tree)
   edge_table = nfa.edge_table;
 }
 
-NFA
-NFA::build_nfa_from_tree(ParseNode *tree)
-{
+NFA NFA::build_nfa_from_tree(ParseNode *tree) {
   assert(tree);
 
   switch (tree->type) {
@@ -126,9 +118,7 @@ NFA::build_nfa_from_tree(ParseNode *tree)
   }
 }
 
-NFA
-NFA::build_nfa_alternation(ParseNode *tree)
-{
+NFA NFA::build_nfa_alternation(ParseNode *tree) {
   NFA nfa1 = build_nfa_from_tree(tree->left);
   NFA nfa2 = build_nfa_from_tree(tree->right);
 
@@ -165,17 +155,13 @@ NFA::build_nfa_alternation(ParseNode *tree)
   return new_nfa;
 }
 
-NFA
-NFA::build_nfa_concat(ParseNode *tree)
-{
+NFA NFA::build_nfa_concat(ParseNode *tree) {
   NFA nfa1 = build_nfa_from_tree(tree->left);
   NFA nfa2 = build_nfa_from_tree(tree->right);
   return concat_nfa(nfa1, nfa2);
 }
 
-NFA
-NFA::build_nfa_repeat(ParseNode *tree)
-{
+NFA NFA::build_nfa_repeat(ParseNode *tree) {
   int repeat_lower = tree->repeat_lower;
   int repeat_upper = tree->repeat_upper;
 
@@ -197,7 +183,7 @@ NFA::build_nfa_repeat(ParseNode *tree)
 
   // Util new edges
   Edge *edge = new Edge(BEGIN_LOOP_EDGE, tree->loc, regex_loop);
-  nfa.add_edge(0, nfa.initial, edge);	   // new initial to old initial
+  nfa.add_edge(0, nfa.initial, edge); // new initial to old initial
   edge = new Edge(END_LOOP_EDGE, tree->loc, regex_loop);
   nfa.add_edge(nfa.final, nfa.size - 1, edge); // old final to new final
 
@@ -208,12 +194,10 @@ NFA::build_nfa_repeat(ParseNode *tree)
   return nfa;
 }
 
-NFA
-NFA::build_nfa_string(ParseNode *tree)
-{
+NFA NFA::build_nfa_string(ParseNode *tree) {
   NFA nfa(2, 0, 1);
-  RegexString *regex_str =
-    new RegexString(tree->left->char_set, tree->repeat_lower, tree->repeat_upper);
+  RegexString *regex_str = new RegexString(
+      tree->left->char_set, tree->repeat_lower, tree->repeat_upper);
   Location loc = std::make_pair(tree->left->loc.first, tree->loc.second);
   Edge *edge = new Edge(STRING_EDGE, loc, regex_str);
   nfa.add_edge(0, 1, edge);
@@ -221,78 +205,59 @@ NFA::build_nfa_string(ParseNode *tree)
   return nfa;
 }
 
-NFA
-NFA::build_nfa_group(ParseNode *tree)
-{
+NFA NFA::build_nfa_group(ParseNode *tree) {
   return build_nfa_from_tree(tree->left);
 }
 
-
-NFA
-NFA::build_nfa_character(ParseNode *tree)
-{
-  NFA nfa(2, 0, 1);	// size = 2, initial = 0 , final = 1
+NFA NFA::build_nfa_character(ParseNode *tree) {
+  NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   Edge *edge = new Edge(CHARACTER_EDGE, tree->loc, tree->character);
   nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-NFA
-NFA::build_nfa_caret(ParseNode *tree)
-{
-  NFA nfa(2, 0, 1);	// size = 2, initial = 0 , final = 1
+NFA NFA::build_nfa_caret(ParseNode *tree) {
+  NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   Edge *edge = new Edge(CARET_EDGE, tree->loc);
   nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-NFA
-NFA::build_nfa_dollar(ParseNode *tree)
-{
-  NFA nfa(2, 0, 1);	// size = 2, initial = 0 , final = 1
+NFA NFA::build_nfa_dollar(ParseNode *tree) {
+  NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   Edge *edge = new Edge(DOLLAR_EDGE, tree->loc);
   nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-NFA
-NFA::build_nfa_char_set(ParseNode *tree)
-{
-  NFA nfa(2, 0, 1);     // size = 2, initial = 0, final = 1
+NFA NFA::build_nfa_char_set(ParseNode *tree) {
+  NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
   Edge *edge = new Edge(CHAR_SET_EDGE, tree->loc, tree->char_set);
   nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-NFA
-NFA::build_nfa_ignored(ParseNode *tree)
-{
-  NFA nfa(2, 0, 1);	// size = 2, initial = 0 , final = 1
+NFA NFA::build_nfa_ignored(ParseNode *tree) {
+  NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   nfa.add_edge(0, 1, &EPSILON);
   return nfa;
 }
 
-NFA
-NFA::build_nfa_backreference(ParseNode *tree)
-{
-  NFA nfa(2, 0, 1);     // size = 2, initial = 0, final = 1
+NFA NFA::build_nfa_backreference(ParseNode *tree) {
+  NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
   Edge *edge = new Edge(BACKREFERENCE_EDGE, tree->loc, tree->backref);
   nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-void
-NFA::add_edge(unsigned int from, unsigned int to, Edge *edge)
-{
+void NFA::add_edge(unsigned int from, unsigned int to, Edge *edge) {
   assert(from < size);
   assert(to < size);
 
   edge_table[from][to] = edge;
 }
 
-NFA
-NFA::concat_nfa(NFA nfa1, NFA nfa2)
-{
+NFA NFA::concat_nfa(NFA nfa1, NFA nfa2) {
   // How this is done: First will come nfa1, then nfa2 (its
   // initial state replaced with nfa1's final state)
 
@@ -315,16 +280,15 @@ NFA::concat_nfa(NFA nfa1, NFA nfa2)
   return new_nfa;
 }
 
-void
-NFA::shift_states(unsigned int shift)
-{
+void NFA::shift_states(unsigned int shift) {
   unsigned int new_size = size + shift;
 
-  if (shift < 1) return;
+  if (shift < 1)
+    return;
 
   // create a new, empty edge table (of the new size)
-  std::vector <Edge *> empty_row(new_size, NULL);
-  std::vector <std::vector <Edge *> > new_edge_table(new_size, empty_row);
+  std::vector<Edge *> empty_row(new_size, NULL);
+  std::vector<std::vector<Edge *>> new_edge_table(new_size, empty_row);
 
   // copy all the edges to the new table, at their new locations
   for (unsigned int i = 0; i < size; i++) {
@@ -342,9 +306,7 @@ NFA::shift_states(unsigned int shift)
 
 // fills states from other's states
 // (requires the use of shift_states first)
-void
-NFA::fill_states(const NFA &other)
-{
+void NFA::fill_states(const NFA &other) {
   for (unsigned int i = 0; i < other.size; i++) {
     for (unsigned int j = 0; j < other.size; j++) {
       edge_table[i][j] = other.edge_table[i][j];
@@ -352,11 +314,9 @@ NFA::fill_states(const NFA &other)
   }
 }
 
-void
-NFA::append_empty_state()
-{
+void NFA::append_empty_state() {
   // append a new row (already with a larger size)
-    std::vector <Edge *> empty_row(size + 1, nullptr);
+  std::vector<Edge *> empty_row(size + 1, nullptr);
   edge_table.push_back(empty_row);
 
   // append a new column
@@ -366,27 +326,27 @@ NFA::append_empty_state()
   size += 1;
 }
 
-bool
-NFA::is_regex_string(ParseNode *node, int repeat_lower, int repeat_upper)
-{
+bool NFA::is_regex_string(ParseNode *node, int repeat_lower, int repeat_upper) {
   // Conditions for a string:
   // - Must be a repeated character set node
   // - Must be a * or + meaning that lower is 0 or 1, upper is -1 (no limit)
   // - Character set node must contain sufficient selections for a string
   //
-  if (node->type != CHAR_SET_NODE) return false;
-  if (repeat_upper != -1) return false;
-  if (repeat_lower != 0 && repeat_lower != 1) return false;
-  if (!(node->char_set->is_string_candidate())) return false;
+  if (node->type != CHAR_SET_NODE)
+    return false;
+  if (repeat_upper != -1)
+    return false;
+  if (repeat_lower != 0 && repeat_lower != 1)
+    return false;
+  if (!(node->char_set->is_string_candidate()))
+    return false;
 
   return true;
 }
 
-std::vector <Path>
-NFA::find_basis_paths()
-{
+std::vector<Path> NFA::find_basis_paths() {
   Path path(initial);
-  std::vector <Path> paths;
+  std::vector<Path> paths;
   bool *visited = new bool[size];
   for (unsigned int i = 0; i < size; i++)
     visited[i] = false;
@@ -398,10 +358,8 @@ NFA::find_basis_paths()
   return paths;
 }
 
-void
-NFA::traverse(unsigned int curr_state, Path path, std::vector <Path> &paths,
-    bool *visited)
-{
+void NFA::traverse(unsigned int curr_state, Path path, std::vector<Path> &paths,
+                   bool *visited) {
   // stop if you already have been here
   bool been_here = visited[curr_state];
 
@@ -412,25 +370,25 @@ NFA::traverse(unsigned int curr_state, Path path, std::vector <Path> &paths,
     return;
   }
 
-  // for each adjacent state, find all paths 
+  // for each adjacent state, find all paths
   for (unsigned int next_state = 0; next_state < size; next_state++) {
     Edge *edge = edge_table[curr_state][next_state];
-    if (edge == nullptr) continue;
+    if (edge == nullptr)
+      continue;
     path.append(edge, next_state);
     traverse(next_state, path, paths, visited);
     path.remove_last();
-    if (been_here) break;
+    if (been_here)
+      break;
   }
 }
 
-void
-NFA::print()
-{
+void NFA::print() {
   std::cout << "NFA: " << std::endl;
   std::cout << "Number of states: " << size << " ";
   std::cout << "Initial state: " << initial << " ";
   std::cout << "Final state: " << final << std::endl;
-  
+
   std::cout << "Edge table: " << std::endl;
   for (unsigned int from = 0; from < size; from++) {
     std::cout << "State " << from << ": ";
@@ -438,18 +396,16 @@ NFA::print()
     for (unsigned int to = 0; to < size; to++) {
       Edge *edge = edge_table[from][to];
       if (edge != nullptr) {
-          std::cout << "  To state " << to << " on ";
-	edge->print();
+        std::cout << "  To state " << to << " on ";
+        edge->print();
       }
     }
   }
 
-    std::cout << std::endl;
+  std::cout << std::endl;
 }
 
-void
-NFA::add_stats(Stats &stats)
-{
+void NFA::add_stats(Stats &stats) {
   int edge_count = 0;
   int char_count = 0;
   int charset_count = 0;
@@ -466,35 +422,35 @@ NFA::add_stats(Stats &stats)
       Edge *edge = edge_table[from][to];
       if (edge != NULL) {
         edge_count++;
-	switch (edge->get_type()) {
-	  case CHARACTER_EDGE:
-	    char_count++;
-	    break;
-	  case CHAR_SET_EDGE:
-	    charset_count++;
-	    break;
-	  case STRING_EDGE:
-	    string_count++;
-	    break;
-	  case BEGIN_LOOP_EDGE:
-	    begin_loop_count++;
-	    break;
-	  case END_LOOP_EDGE:
-	    end_loop_count++;
-	    break;
-	  case CARET_EDGE:
-	    caret_count++;
-	    break;
-	  case DOLLAR_EDGE:
-	    dollar_count++;
-	    break;
-	  case BACKREFERENCE_EDGE:
-	    backreference_count++;
-	    break;
-	  case EPSILON_EDGE:
-	    epsilon_count++;
-	    break;
-	}
+        switch (edge->get_type()) {
+        case CHARACTER_EDGE:
+          char_count++;
+          break;
+        case CHAR_SET_EDGE:
+          charset_count++;
+          break;
+        case STRING_EDGE:
+          string_count++;
+          break;
+        case BEGIN_LOOP_EDGE:
+          begin_loop_count++;
+          break;
+        case END_LOOP_EDGE:
+          end_loop_count++;
+          break;
+        case CARET_EDGE:
+          caret_count++;
+          break;
+        case DOLLAR_EDGE:
+          dollar_count++;
+          break;
+        case BACKREFERENCE_EDGE:
+          backreference_count++;
+          break;
+        case EPSILON_EDGE:
+          epsilon_count++;
+          break;
+        }
       }
     }
   }

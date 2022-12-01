@@ -19,19 +19,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "egret.h"
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "egret.h"
 using namespace std;
 
 static char *get_arg(int &idx, int argc, char **argv);
 
-int
-main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   cout << "RUNNING PROGRAM" << endl;
   int idx = 1;
   string regex = "";
@@ -49,8 +47,9 @@ main(int argc, char *argv[])
     // -r: regular expression
     if (strcmp(arg, "-r") == 0) {
       if (regex != "") {
-	cerr << "USAGE: Can only have one regular expression to process" << endl;
-	return -1;
+        cerr << "USAGE: Can only have one regular expression to process"
+             << endl;
+        return -1;
       }
       regex = get_arg(idx, argc, argv);
     }
@@ -65,10 +64,11 @@ main(int argc, char *argv[])
         cerr << "USAGE: Unable to open file " << file_name << endl;
         return -1;
       }
-      
+
       if (regex != "") {
-	cerr << "USAGE: Can only have one regular expression to process" << endl;
-	return -1;
+        cerr << "USAGE: Can only have one regular expression to process"
+             << endl;
+        return -1;
       }
 
       getline(regexFile, regex);
@@ -85,7 +85,7 @@ main(int argc, char *argv[])
       check_mode = true;
     }
 
-    // -d: print debug information based on the given mode 
+    // -d: print debug information based on the given mode
     else if (strcmp(arg, "-d") == 0) {
       debug_mode = true;
     }
@@ -100,7 +100,6 @@ main(int argc, char *argv[])
       web_mode = true;
     }
 
-
     // everything else is invalid
     else {
       cerr << "USAGE: Invalid command line option: " << arg << endl;
@@ -113,10 +112,10 @@ main(int argc, char *argv[])
     return -1;
   }
 
-  vector <string> test_strings =
-    run_engine(regex, base_substring, check_mode, web_mode, debug_mode, stat_mode);
+  vector<string> test_strings = run_engine(regex, base_substring, check_mode,
+                                           web_mode, debug_mode, stat_mode);
 
-  vector <string>::iterator it;
+  vector<string>::iterator it;
   for (it = test_strings.begin(); it != test_strings.end(); it++) {
     cout << *it << endl;
   }
@@ -124,9 +123,7 @@ main(int argc, char *argv[])
   return 0;
 }
 
-static char *
-get_arg(int &idx, int argc, char **argv)
-{
+static char *get_arg(int &idx, int argc, char **argv) {
   char *arg;
 
   if (idx >= argc) {

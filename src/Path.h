@@ -22,22 +22,21 @@
 #ifndef PATH_H
 #define PATH_H
 
+#include "Edge.h"
 #include <set>
 #include <string>
 #include <vector>
-#include "Edge.h"
 
 class Path {
 
 public:
-
   Path() = default;
   Path(unsigned int initial) { states.push_back(initial); }
   std::string get_test_string() { return test_string; }
 
   // PATH CONSTRUCTION FUNCTIONS
 
-  // adds an edge and the destination state to the path 
+  // adds an edge and the destination state to the path
   void append(Edge *edge, unsigned int state);
 
   // removes the last edge and state
@@ -58,7 +57,7 @@ public:
   bool has_trailing_dollar();
 
   // returns true and emits violation if there is an anchor (^ or $) in the
-  // middle of the path 
+  // middle of the path
   bool check_anchor_in_middle();
 
   // emits violation if a path contains a charset error
@@ -78,12 +77,13 @@ public:
 
   // STRING GENERATION FUNCTIONS
 
-  // generates example string 
+  // generates example string
   std::string gen_example_string(Location loc, char c);
   std::string gen_example_string(Location loc, char c, char except);
   std::string gen_example_string(Location loc, char c, Location omit);
-  std::string gen_example_string(Location loc1, char c1, Location loc2, char c2);
-  std::string gen_example_string(Location loc, const std::string& replace);
+  std::string gen_example_string(Location loc1, char c1, Location loc2,
+                                 char c2);
+  std::string gen_example_string(Location loc, const std::string &replace);
 
   // generates string based on location
   std::string gen_backref_string(Location loc);
@@ -92,19 +92,19 @@ public:
   std::string gen_min_iter_string();
 
   // generates evil strings for the path
-  std::vector <std::string> gen_evil_strings(const std::set <char> &punct_marks);
+  std::vector<std::string> gen_evil_strings(const std::set<char> &punct_marks);
 
   // PRINT FUNCTION
-  
+
   // prints the path
   void print();
 
 private:
-  std::vector <unsigned int> states;		// list of states
-  std::vector <Edge *> edges;		// list of edges
-  std::string test_string;		// test string associated with path
-  std::vector <unsigned int> evil_edges;	// list of evil edges that need processing
-
+  std::vector<unsigned int> states; // list of states
+  std::vector<Edge *> edges;        // list of edges
+  std::string test_string;          // test string associated with path
+  std::vector<unsigned int>
+      evil_edges; // list of evil edges that need processing
 };
 
 #endif // PATH_H

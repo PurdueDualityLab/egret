@@ -22,34 +22,35 @@
 #ifndef CHARSET_H
 #define CHARSET_H
 
+#include "Util.h"
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
-#include "Util.h"
 
-class Path;             // breaks a circular dependency CharSet --> Path --> Edge --> CharSet
+class Path; // breaks a circular dependency CharSet --> Path --> Edge -->
+            // CharSet
 
-typedef enum
-{
+typedef enum {
   CHARACTER_ITEM,
   CHAR_CLASS_ITEM,
   CHAR_RANGE_ITEM
 } CharSetItemType;
 
-struct CharSetItem
-{
+struct CharSetItem {
   CharSetItemType type;
-  char character;	// for CHARACTER_ITEM and CHAR_CLASS_ITEM
-  char range_start;	// for CHAR_RANGE_ITEM
-  char range_end;	// for CHAR_RANGE_ITEM
+  char character;   // for CHARACTER_ITEM and CHAR_CLASS_ITEM
+  char range_start; // for CHAR_RANGE_ITEM
+  char range_end;   // for CHAR_RANGE_ITEM
 };
 
 class CharSet {
 
 public:
-
-  CharSet() { complement = false; checked = false; }
+  CharSet() {
+    complement = false;
+    checked = false;
+  }
 
   // setters
   void set_prefix(std::string p) { prefix = std::move(p); }
@@ -80,7 +81,7 @@ public:
   // returns true if character set only has punctuation and spaces
   bool only_has_punc_and_spaces();
 
-  // determines if a character is valid 
+  // determines if a character is valid
   bool is_valid_character(char character);
 
   // returns true if character is explicitly part of non-negated character set
@@ -107,7 +108,8 @@ public:
   // TEST GENERATION FUNCTIONS
 
   // generate evil strings
-  std::vector <std::string> gen_evil_strings(std::string test_string, const std::set <char> &punct_marks);
+  std::vector<std::string> gen_evil_strings(std::string test_string,
+                                            const std::set<char> &punct_marks);
 
   // PRINT FUNCTION
 
@@ -115,11 +117,10 @@ public:
   void print();
 
 private:
-
-  std::vector <CharSetItem> items;	// set of items comprising the set
-  bool complement;		// true if set is complemented
-  std::string prefix;		// path string up to visiting this node
-  bool checked;			// true of charset has been checked
+  std::vector<CharSetItem> items; // set of items comprising the set
+  bool complement;                // true if set is complemented
+  std::string prefix;             // path string up to visiting this node
+  bool checked;                   // true of charset has been checked
 
   // checker functions
   bool only_has_punc(bool allow_spaces = false);
@@ -132,9 +133,9 @@ private:
   std::string fix_comma_bar_charset(Location loc, char elim);
   void replace(std::string &str, std::string from, std::string to);
   std::string replace_charset_with_parens(Location loc);
-  
+
   // creates a set of test characters
-  std::set <char> create_test_chars(const std::set <char> &punct_marks);
+  std::set<char> create_test_chars(const std::set<char> &punct_marks);
 };
 
 #endif // CHARSET_H

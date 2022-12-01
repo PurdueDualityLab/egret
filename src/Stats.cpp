@@ -19,36 +19,33 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
+#include "Stats.h"
 #include <iomanip>
+#include <iostream>
 #include <string>
 #include <vector>
-#include "Stats.h"
 
-void
-Stats::add(std::string tag, std::string name, int value)
-{
-  Stat stat = { tag, name, value };
+void Stats::add(std::string tag, std::string name, int value) {
+  Stat stat = {tag, name, value};
   statList.push_back(stat);
 }
 
-void
-Stats::print()
-{
+void Stats::print() {
   const int WIDTH = 30;
 
   std::string prev_tag = "";
-  std::vector <Stat>::iterator it;
+  std::vector<Stat>::iterator it;
   for (it = statList.begin(); it != statList.end(); it++) {
 
     // print divider line between different tags
     if (it->tag != prev_tag && prev_tag != "") {
-      for (int i = 0; i < WIDTH + 8; i++) std::cout << "-";
+      for (int i = 0; i < WIDTH + 8; i++)
+        std::cout << "-";
       std::cout << std::endl;
     }
 
-    std::cout << std::left << std::setw(WIDTH) << it->name << "| " << it->value << std::endl;
+    std::cout << std::left << std::setw(WIDTH) << it->name << "| " << it->value
+              << std::endl;
     prev_tag = it->tag;
   }
 }
-  

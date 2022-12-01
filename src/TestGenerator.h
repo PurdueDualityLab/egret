@@ -25,36 +25,34 @@
 #ifndef TEST_GENERATOR_H
 #define TEST_GENERATOR_H
 
+#include "Path.h"
 #include <set>
 #include <string>
 #include <vector>
-#include "Path.h"
 
 class TestGenerator {
 
 public:
-
-  TestGenerator(std::vector <Path> p, std::set <char> m, bool d) {
+  TestGenerator(std::vector<Path> p, std::set<char> m, bool d) {
     paths = p;
     punct_marks = m;
     debug_mode = d;
   }
 
   // generate test strings
-  std::vector <std::string> gen_test_strings();
+  std::vector<std::string> gen_test_strings();
 
   // add test generation stats
   void add_stats(Stats &stats);
 
 private:
+  std::vector<Path> paths;    // list of paths
+  std::set<char> punct_marks; // set of punct marks
+  bool debug_mode;            // set if debug mode is on
 
-  std::vector <Path> paths;		// list of paths
-  std::set <char> punct_marks;	// set of punct marks
-  bool debug_mode;		// set if debug mode is on
+  std::vector<std::string> test_strings; // list of test strings
 
-  std::vector <std::string> test_strings;     // list of test strings
-
-  int num_gen_strings;          // number of generated strings (for stats)
+  int num_gen_strings; // number of generated strings (for stats)
 
   // TEST STRING GENERATION FUNCTIONS
 

@@ -19,23 +19,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <string>
-#include <sstream>
 #include "Util.h"
+#include <sstream>
+#include <string>
 
 // global static pointer for singleton class
-Util* Util::inst = nullptr;
+Util *Util::inst = nullptr;
 
-Util *
-Util::get() 
-{
-  if (inst == nullptr) inst = new Util;
+Util *Util::get() {
+  if (inst == nullptr)
+    inst = new Util;
   return inst;
 }
 
-void
-Util::init(std::string r, bool c, bool w, std::string s)
-{
+void Util::init(std::string r, bool c, bool w, std::string s) {
   regex = r;
   check_mode = c;
   web_mode = w;
@@ -44,11 +41,10 @@ Util::init(std::string r, bool c, bool w, std::string s)
   prev_alerts.clear();
 }
 
-void
-Util::add_alert(Alert alert)
-{
+void Util::add_alert(Alert alert) {
   // Create type, location pair
-  std::pair <std::string, int> alert_pair = make_pair(alert.type, alert.loc1.first);
+  std::pair<std::string, int> alert_pair =
+      make_pair(alert.type, alert.loc1.first);
 
   // Line break
   std::string lb = web_mode ? "<br>" : "\n";
@@ -58,27 +54,28 @@ Util::add_alert(Alert alert)
   if (prev_alerts.find(alert_pair) == prev_alerts.end()) {
     // New error - add to list of previous alerts
     prev_alerts.insert(alert_pair);
-  }
-  else {
+  } else {
     // Duplicate - do not add the error again
     return;
   }
 
-  // Ignore warnings in check mode (warnings only relevant in test generation mode)
-  if (alert.warning && check_mode) return;
+  // Ignore warnings in check mode (warnings only relevant in test generation
+  // mode)
+  if (alert.warning && check_mode)
+    return;
 
   // Produce alert message
-    std::stringstream s;
+  std::stringstream s;
   if (alert.warning)
     s << "WARNING (";
   else
     s << "VIOLATION (";
   s << alert.type << "): " << alert.message << lb;
-  
+
   if (alert.loc1.first != -1) {
     s << "...Regex: ";
 
-    for (int i = 0; i < (int) regex.size(); i++) {
+    for (int i = 0; i < (int)regex.size(); i++) {
       if (i == alert.loc1.first || i == alert.loc2.first) {
         s << start;
       }

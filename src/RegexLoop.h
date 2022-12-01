@@ -28,7 +28,6 @@
 class RegexLoop {
 
 public:
-
   RegexLoop(int lower, int upper) {
     repeat_lower = lower;
     repeat_upper = upper;
@@ -38,7 +37,7 @@ public:
   void set_prefix(std::string p) { prefix = p; }
   void set_substring_from_curr() { substring = curr_substring; }
   void set_curr_prefix(std::string p) { curr_prefix = p; }
-  void set_curr_substring(const std::string& test_string);
+  void set_curr_substring(const std::string &test_string);
 
   // getters
   int get_repeat_lower() { return repeat_lower; }
@@ -52,23 +51,21 @@ public:
   void gen_min_iter_string(std::string &min_iter_string);
 
   // generate evil strings
-  std::vector <std::string> gen_evil_strings(std::string test_string);
+  std::vector<std::string> gen_evil_strings(std::string test_string);
 
   // print the regex loop
   void print();
 
 private:
-
-  int repeat_lower;     	// lower bound for repeat quantifiers 
-  int repeat_upper;     	// upper bound for repeat quantifiers (-1 if no bound)
+  int repeat_lower; // lower bound for repeat quantifiers
+  int repeat_upper; // upper bound for repeat quantifiers (-1 if no bound)
 
   // TODO: Rename these to something like evil prefix
-  std::string prefix;       	        // prefix of test string before the loop
-  std::string substring;    	        // substring corresponding to loop
+  std::string prefix;    // prefix of test string before the loop
+  std::string substring; // substring corresponding to loop
 
-  std::string curr_prefix;           // current path string up to visiting this node
-  std::string curr_substring;        // current substring corresponding to this string
+  std::string curr_prefix;    // current path string up to visiting this node
+  std::string curr_substring; // current substring corresponding to this string
 };
 
 #endif // REGEX_LOOP_H
-

@@ -24,8 +24,7 @@
 
 #include <vector>
 
-class Stats
-{
+class Stats {
 
 public:
   // adds a stat to the list of stats
@@ -35,14 +34,13 @@ public:
   void print();
 
 private:
-
   struct Stat {
     std::string tag;
     std::string name;
     int value;
   };
 
-  std::vector <Stat> statList;
+  std::vector<Stat> statList;
 };
 
 #endif // STATS_H

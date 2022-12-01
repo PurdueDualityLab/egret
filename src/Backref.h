@@ -22,15 +22,14 @@
 #ifndef BACKREF_H
 #define BACKREF_H
 
+#include "Util.h"
 #include <string>
 #include <utility>
 #include <vector>
-#include "Util.h"
 
 class Backref {
 
 public:
-
   Backref(std::string name, int number, Location l) {
     group_name = std::move(name);
     group_number = number;
@@ -45,28 +44,29 @@ public:
 
   // getters
   Location get_group_loc() { return group_loc; }
-    std::string get_substring() { return substring; }
+  std::string get_substring() { return substring; }
 
   // generate minimum iteration string
   void gen_min_iter_string(std::string &min_iter_string);
 
   // generate evil strings
-  std::vector <std::string> gen_evil_strings(std::string test_string);
+  std::vector<std::string> gen_evil_strings(std::string test_string);
 
   // print the regex loop
   void print();
 
 private:
-    std::string group_name;            // name of group (blank if using numbered backreference)
-    int group_number;             // number of group
-    Location group_loc;           // location of group
+  std::string
+      group_name;     // name of group (blank if using numbered backreference)
+  int group_number;   // number of group
+  Location group_loc; // location of group
 
-    std::string prefix;       	        // prefix of test string before the backreference
-    std::string substring;    	        // substring corresponding to backreference
+  std::string prefix;    // prefix of test string before the backreference
+  std::string substring; // substring corresponding to backreference
 
-    std::string curr_prefix;           // current path string up to visiting this node
-    std::string curr_substring;        // current substring corresponding to this backreference
+  std::string curr_prefix; // current path string up to visiting this node
+  std::string
+      curr_substring; // current substring corresponding to this backreference
 };
 
 #endif // BACKREF_H
-

@@ -25,27 +25,26 @@
 #ifndef NFA_H
 #define NFA_H
 
-#include <vector>
-#include "Edge.h"
 #include "CharSet.h"
+#include "Edge.h"
 #include "ParseTree.h"
 #include "Path.h"
 #include "Stats.h"
+#include <vector>
 
 class NFA {
 
 public:
-
   NFA() = default;
   NFA(unsigned int _size, unsigned int _initial, unsigned int _final);
   NFA(const NFA &other);
-  NFA &operator= (const NFA &other);
+  NFA &operator=(const NFA &other);
 
   // build an NFA from the parse tree
   void build(ParseTree &tree);
 
   // create a set of basis paths
-  std::vector <Path> find_basis_paths();
+  std::vector<Path> find_basis_paths();
 
   // print out the NFA
   void print();
@@ -54,12 +53,11 @@ public:
   void add_stats(Stats &stats);
 
 private:
+  unsigned int size;                           // number of states
+  unsigned int initial;                        // initial state
+  unsigned int final;                          // final state
+  std::vector<std::vector<Edge *>> edge_table; // edge table
 
-  unsigned int size;			// number of states
-  unsigned int initial;			// initial state
-  unsigned int final;			// final state
-  std::vector <std::vector <Edge *> > edge_table;	// edge table
-  
   // builds an NFA from tree
   NFA build_nfa_from_tree(ParseNode *tree);
 
@@ -102,7 +100,8 @@ private:
   // concatenates two NFAs together
   NFA concat_nfa(NFA nfa1, NFA nfa2);
 
-  // shift (renames) all the states in the NFA according to some (positive) shift factor
+  // shift (renames) all the states in the NFA according to some (positive)
+  // shift factor
   void shift_states(unsigned int shift);
 
   // fills states from other's states
@@ -115,9 +114,8 @@ private:
   bool is_regex_string(ParseNode *node, int repeat_lower, int repeat_upper);
 
   // utility function to find all paths through the NFA
-  void traverse(unsigned int curr_state, Path path, std::vector <Path> &paths,
-      bool *visited);
+  void traverse(unsigned int curr_state, Path path, std::vector<Path> &paths,
+                bool *visited);
 };
 
 #endif // NFA_H
-

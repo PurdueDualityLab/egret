@@ -19,17 +19,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "egret.h"
 #include <Python.h>
 #include <string>
 #include <vector>
-#include "egret.h"
 using namespace std;
 
 static PyObject *EgretExtError;
 
-static PyObject *
-egret_run(PyObject *self, PyObject *args)
-{
+static PyObject *egret_run(PyObject *self, PyObject *args) {
   const char *regex;
   const char *base_substring;
   int check_mode;
@@ -37,15 +35,15 @@ egret_run(PyObject *self, PyObject *args)
   int debug_mode;
   int stat_mode;
 
-  if (!PyArg_ParseTuple(args, "sspppp", &regex, &base_substring,
-        &check_mode, &web_mode, &debug_mode, &stat_mode))
+  if (!PyArg_ParseTuple(args, "sspppp", &regex, &base_substring, &check_mode,
+                        &web_mode, &debug_mode, &stat_mode))
     return NULL;
 
-  vector <string> tests =
-    run_engine(regex, base_substring, check_mode, web_mode, debug_mode, stat_mode);
+  vector<string> tests = run_engine(regex, base_substring, check_mode, web_mode,
+                                    debug_mode, stat_mode);
 
   PyObject *list = PyList_New(0);
-  vector <string>::iterator it;
+  vector<string>::iterator it;
   for (it = tests.begin(); it != tests.end(); it++) {
     PyList_Append(list, PyUnicode_FromString((*it).c_str()));
   }
@@ -54,33 +52,29 @@ egret_run(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef EgretExtMethods[] = {
-  {"run", egret_run, METH_VARARGS, "Run EGRET."},
-  {NULL, NULL, 0, NULL}        /* Sentinel */
+    {"run", egret_run, METH_VARARGS, "Run EGRET."},
+    {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
 static struct PyModuleDef egret_extmodule = {
-  PyModuleDef_HEAD_INIT,
-  "egret_ext", /* name of module */
-  NULL,       /* module documentation, may be NULL */
-  -1,         /* size of per-interpreter state of the module,
-               or -1 if the module keeps state in global variables. */
-  EgretExtMethods
-};
+    PyModuleDef_HEAD_INIT, "egret_ext", /* name of module */
+    NULL,                               /* module documentation, may be NULL */
+    -1, /* size of per-interpreter state of the module,
+         or -1 if the module keeps state in global variables. */
+    EgretExtMethods};
 
 extern "C" {
 
-  PyMODINIT_FUNC
-  PyInit_egret_ext(void)
-  {
-    PyObject *m;
+PyMODINIT_FUNC PyInit_egret_ext(void) {
+  PyObject *m;
 
-    m = PyModule_Create(&egret_extmodule);
-    if (m == NULL)
-      return NULL;
+  m = PyModule_Create(&egret_extmodule);
+  if (m == NULL)
+    return NULL;
 
-    EgretExtError = PyErr_NewException("egret_ext.error", NULL, NULL);
-    Py_INCREF(EgretExtError);
-    PyModule_AddObject(m, "error", EgretExtError);
-    return m;
-  }
+  EgretExtError = PyErr_NewException("egret_ext.error", NULL, NULL);
+  Py_INCREF(EgretExtError);
+  PyModule_AddObject(m, "error", EgretExtError);
+  return m;
+}
 }

@@ -46,10 +46,10 @@
 // 		|   char_set
 //
 // group	::= '(' expr ')'		(group)
-// 		| '(' NO_GROUP_EXT expr ')'		
-// 		| '(' NAMED_GROUP_EXT expr ')'		
-// 		| '(' IGNORED_EXT expr ')'		
-// 		| '(' IGNORED_EXT ')'		
+// 		| '(' NO_GROUP_EXT expr ')'
+// 		| '(' NAMED_GROUP_EXT expr ')'
+// 		| '(' IGNORED_EXT expr ')'
+// 		| '(' IGNORED_EXT ')'
 //
 // character	::= CHARACTER 			(character)
 //		|   '^'
@@ -82,16 +82,15 @@
 #ifndef PARSE_TREE_H
 #define PARSE_TREE_H
 
-#include <set>
-#include <cassert>
-#include <unordered_map>
-#include "Scanner.h"
 #include "Backref.h"
 #include "CharSet.h"
+#include "Scanner.h"
 #include "Stats.h"
+#include <cassert>
+#include <set>
+#include <unordered_map>
 
-typedef enum
-{
+typedef enum {
   ALTERNATION_NODE,
   CONCAT_NODE,
   REPEAT_NODE,
@@ -104,8 +103,7 @@ typedef enum
   IGNORED_NODE
 } NodeType;
 
-struct ParseNode
-{
+struct ParseNode {
   ParseNode(NodeType t, Location _loc, ParseNode *l, ParseNode *r) {
     type = t;
     loc = _loc;
@@ -114,7 +112,8 @@ struct ParseNode
     char_set = NULL;
   }
 
-  ParseNode(NodeType t, Location _loc, std::string _name, ParseNode *l, ParseNode *r) {
+  ParseNode(NodeType t, Location _loc, std::string _name, ParseNode *l,
+            ParseNode *r) {
     assert(t == GROUP_NODE);
     type = t;
     loc = _loc;
@@ -167,18 +166,17 @@ struct ParseNode
   Location loc;
   ParseNode *left;
   ParseNode *right;
-  char character;	// For CHARACTER_NODE
-  CharSet *char_set;	// For CHAR_SET_NODE
-  int repeat_lower;	// For REPEAT_NODE
-  int repeat_upper;	// For REPEAT_NODE (-1 for no limit)
-  Backref *backref;     // For BACKREFERENCE_NODE
-  std::string group_name;    // For GROUP_NODE
+  char character;         // For CHARACTER_NODE
+  CharSet *char_set;      // For CHAR_SET_NODE
+  int repeat_lower;       // For REPEAT_NODE
+  int repeat_upper;       // For REPEAT_NODE (-1 for no limit)
+  Backref *backref;       // For BACKREFERENCE_NODE
+  std::string group_name; // For GROUP_NODE
 };
 
 class ParseTree {
 
 public:
-
   // build parse tree using regex stored in scanner
   void build(Scanner &_scanner);
 
@@ -195,10 +193,9 @@ public:
   void add_stats(Stats &stats);
 
 private:
-
-  ParseNode *root;		// root of parse tree
-  Scanner scanner;		// scanner
-  std::set<char> punct_marks;	// set of punctuation marks
+  ParseNode *root;            // root of parse tree
+  Scanner scanner;            // scanner
+  std::set<char> punct_marks; // set of punctuation marks
   std::unordered_map<int, Location> group_locs;
   std::unordered_map<std::string, Location> named_group_locs;
   int group_count;
@@ -237,8 +234,6 @@ private:
     int ignored_nodes;
   };
   void gather_stats(ParseNode *node, ParseTreeStats &tree_stats);
-
 };
 
 #endif // PARSE_TREE_H
-

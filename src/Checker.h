@@ -22,18 +22,17 @@
 #ifndef CHECKER_H
 #define CHECKER_H
 
+#include "Path.h"
+#include "Scanner.h"
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
-#include "Scanner.h"
-#include "Path.h"
 
 class Checker {
 
 public:
-
-  Checker(std::vector <Path> p, std::vector <Token> t) {
+  Checker(std::vector<Path> p, std::vector<Token> t) {
     paths = std::move(p);
     tokens = std::move(t);
   }
@@ -42,9 +41,8 @@ public:
   void check();
 
 private:
-
-  std::vector <Path> paths;		// list of paths
-  std::vector <Token> tokens;        // set of tokens - used for generated fixes
+  std::vector<Path> paths;   // list of paths
+  std::vector<Token> tokens; // set of tokens - used for generated fixes
 
   // CHECKER FUNCTIONS
 
@@ -66,8 +64,8 @@ private:
   // checks if punctuation can be repeated in certain situations
   void check_repeat_punctuation();
 
-   // checks if digits are too optional
-   void check_digit_too_optional();
+  // checks if digits are too optional
+  void check_digit_too_optional();
 
   // fix anchors
   std::string fix_anchors();

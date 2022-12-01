@@ -19,22 +19,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "RegexLoop.h"
 #include <iostream>
 #include <set>
 #include <string>
-#include "RegexLoop.h"
 
-void
-RegexLoop::set_curr_substring(const std::string& test_string)
-{
+void RegexLoop::set_curr_substring(const std::string &test_string) {
   curr_substring = test_string.substr(curr_prefix.size());
 }
 
-std::string
-RegexLoop::get_substring()
-{
-  // The test string already contains one iteration from the elements in the loop.
-  // This function return additional iterations if the lower bound is greater than 1.
+std::string RegexLoop::get_substring() {
+  // The test string already contains one iteration from the elements in the
+  // loop. This function return additional iterations if the lower bound is
+  // greater than 1.
   std::string extra;
   for (int j = 1; j < repeat_lower; j++) {
     extra += curr_substring;
@@ -43,27 +40,20 @@ RegexLoop::get_substring()
   return extra;
 }
 
-bool
-RegexLoop::is_opt_repeat()
-{
+bool RegexLoop::is_opt_repeat() {
   return (repeat_lower == 0 && repeat_upper == 1);
 }
 
-void
-RegexLoop::gen_min_iter_string(std::string &min_iter_string)
-{
+void RegexLoop::gen_min_iter_string(std::string &min_iter_string) {
   if (repeat_lower != 0) {
     min_iter_string += get_substring();
-  }
-  else {
+  } else {
     min_iter_string = curr_prefix;
   }
 }
 
-std::vector <std::string>
-RegexLoop::gen_evil_strings(std::string test_string)
-{
-  std::vector <std::string> evil_strings;
+std::vector<std::string> RegexLoop::gen_evil_strings(std::string test_string) {
+  std::vector<std::string> evil_strings;
 
   // Create suffix: substring after the loop
   int start = prefix.size() + substring.size();
@@ -85,18 +75,18 @@ RegexLoop::gen_evil_strings(std::string test_string)
     if (repeat_lower == repeat_upper) {
       evil_strings.push_back(one_less_string);
       evil_strings.push_back(one_more_string);
-    }
-    else {
+    } else {
       // Handle one less on lower bound (note if lower bound is zero, the path
       // has one iteration so one less iteration will get us to zero iterations)
       evil_strings.push_back(one_less_string);
 
       // Add enough path elements to get to the upper bound (note if lower bound
-      // is zero, the path has one iteration so the starting point is bumped to one).
-      // The variable path_elements is initialized to substring since suffix
-      // has one substring less than lower bound.
+      // is zero, the path has one iteration so the starting point is bumped to
+      // one). The variable path_elements is initialized to substring since
+      // suffix has one substring less than lower bound.
       int base_iterations = repeat_lower;
-      if (base_iterations == 0) base_iterations = 1;
+      if (base_iterations == 0)
+        base_iterations = 1;
       std::string path_elements = substring;
       for (int i = base_iterations; i < repeat_upper; i++) {
         path_elements += substring;
@@ -114,17 +104,18 @@ RegexLoop::gen_evil_strings(std::string test_string)
       past_bound_string += substring;
       past_bound_string += suffix;
       evil_strings.push_back(past_bound_string);
-    } 
+    }
   }
 
-  else {    // repeat_upper == -1 (no limit)
-    // If lower bound is 0 or 1, add one less (zero) and add one more (two).  Want
-    // to have one case that has repeated (two) elements.
+  else { // repeat_upper == -1 (no limit)
+    // If lower bound is 0 or 1, add one less (zero) and add one more (two).
+    // Want to have one case that has repeated (two) elements.
     if (repeat_lower == 0 || repeat_lower == 1) {
       evil_strings.push_back(one_less_string);
       evil_strings.push_back(one_more_string);
     }
-    // Otherwise, only add the string with one less iteration than the lower bound.
+    // Otherwise, only add the string with one less iteration than the lower
+    // bound.
     else {
       evil_strings.push_back(one_less_string);
     }
@@ -133,9 +124,7 @@ RegexLoop::gen_evil_strings(std::string test_string)
   return evil_strings;
 }
 
-void
-RegexLoop::print()
-{
+void RegexLoop::print() {
   if (repeat_lower == 0 && repeat_upper == -1)
     std::cout << "*";
   else if (repeat_lower == 1 && repeat_upper == -1)
@@ -146,6 +135,6 @@ RegexLoop::print()
     std::cout << "{" << repeat_lower << ",}";
   else if (repeat_lower == repeat_upper)
     std::cout << "{" << repeat_lower << "}";
-  else 
+  else
     std::cout << "{" << repeat_lower << "," << repeat_upper << "}";
 }

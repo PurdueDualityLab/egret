@@ -19,21 +19,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Backref.h"
 #include <iostream>
 #include <set>
 #include <string>
-#include "Backref.h"
 
-void
-Backref::gen_min_iter_string(std::string &min_iter_string)
-{
+void Backref::gen_min_iter_string(std::string &min_iter_string) {
   min_iter_string.append(get_substring());
 }
 
-std::vector <std::string>
-Backref::gen_evil_strings(std::string test_string)
-{
-  std::vector <std::string> evil_strings;
+std::vector<std::string> Backref::gen_evil_strings(std::string test_string) {
+  std::vector<std::string> evil_strings;
   return evil_strings;
 
 #if 0 // TODO: Reimplement backreference evil strings
@@ -104,7 +100,6 @@ Backref::gen_evil_strings(std::string test_string)
 
   return evil_strings;
 #endif
-
 }
 
 #if 0 // TODO: Reimplement backreference evil strings
@@ -170,13 +165,10 @@ gen_evil_backreference_strings(vector <int> &backrefs_done)
 }
 #endif
 
-void
-Backref::print()
-{
+void Backref::print() {
   std::cout << "Group " << group_number;
   if (!group_name.empty()) {
     std::cout << "(" << group_name << ")";
   }
   std::cout << " @ (" << group_loc.first << "," << group_loc.second << ")";
 }
-

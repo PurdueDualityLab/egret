@@ -19,11 +19,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <algorithm>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <stdexcept>
 #include "Checker.h"
 #include "NFA.h"
 #include "ParseTree.h"
@@ -32,24 +27,31 @@
 #include "Stats.h"
 #include "TestGenerator.h"
 #include "Util.h"
+#include <algorithm>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
-std::vector <std::string>
-run_engine(std::string regex, std::string base_substring, bool check_mode = false, bool web_mode = false,
-    bool debug_mode = false, bool stat_mode = false)
-{
+std::vector<std::string>
+run_engine(std::string regex, std::string base_substring,
+           bool check_mode = false, bool web_mode = false,
+           bool debug_mode = false, bool stat_mode = false) {
   Stats stats;
-  std::vector <std::string> test_strings;
+  std::vector<std::string> test_strings;
 
   try {
 
     // check and convert base substring
     if (base_substring.length() < 2) {
-      throw EgretException("ERROR (bad arguments): Base substring must have at least two letters");
+      throw EgretException("ERROR (bad arguments): Base substring must have at "
+                           "least two letters");
     }
 
     for (char i : base_substring) {
       if (!isalpha(i)) {
-        throw EgretException("ERROR (bad arguments): Base substring can only contain letters");
+        throw EgretException(
+            "ERROR (bad arguments): Base substring can only contain letters");
       }
     }
 
@@ -57,29 +59,36 @@ run_engine(std::string regex, std::string base_substring, bool check_mode = fals
     Util::get()->init(regex, check_mode, web_mode, base_substring);
 
     // start debug mode
-    if (debug_mode) std::cout << "RegEx: " << regex << std::endl;
-     
+    if (debug_mode)
+      std::cout << "RegEx: " << regex << std::endl;
+
     // initialize scanner with regex
     Scanner scanner;
     scanner.init(regex);
-    if (debug_mode) scanner.print();
-    if (stat_mode) scanner.add_stats(stats);
-  
+    if (debug_mode)
+      scanner.print();
+    if (stat_mode)
+      scanner.add_stats(stats);
+
     // build parse tree
     ParseTree tree;
     tree.build(scanner);
-    if (debug_mode) tree.print();
-    if (stat_mode) tree.add_stats(stats);
+    if (debug_mode)
+      tree.print();
+    if (stat_mode)
+      tree.add_stats(stats);
 
     // build NFA
     NFA nfa;
     nfa.build(tree);
-    if (debug_mode) nfa.print();
-    if (stat_mode) nfa.add_stats(stats);
+    if (debug_mode)
+      nfa.print();
+    if (stat_mode)
+      nfa.add_stats(stats);
 
     // traverse NFA basis paths and process them
-    std::vector <Path> paths = nfa.find_basis_paths();
-    for (auto & path : paths) {
+    std::vector<Path> paths = nfa.find_basis_paths();
+    for (auto &path : paths) {
       path.process_path();
     }
 
@@ -93,25 +102,26 @@ run_engine(std::string regex, std::string base_substring, bool check_mode = fals
     if (!check_mode) {
       TestGenerator gen(paths, tree.get_punct_marks(), debug_mode);
       test_strings = gen.gen_test_strings();
-      if (stat_mode) gen.add_stats(stats);
+      if (stat_mode)
+        gen.add_stats(stats);
     }
-    
+
     // print stats
-    if (stat_mode) stats.print();
-  }
-  catch (EgretException const &e) {
+    if (stat_mode)
+      stats.print();
+  } catch (EgretException const &e) {
     throw std::runtime_error(e.get_error());
   }
 
   // Add alerts to front of list.
-  std::vector <std::string> alerts = Util::get()->get_alerts();
+  std::vector<std::string> alerts = Util::get()->get_alerts();
   if (check_mode) {
     if (alerts.size() == 0) {
       alerts.insert(alerts.begin(), "No violations detected.");
     }
     return alerts;
   }
-  test_strings.insert(test_strings.begin(),"BEGIN");
+  test_strings.insert(test_strings.begin(), "BEGIN");
   test_strings.insert(test_strings.begin(), alerts.begin(), alerts.end());
 
   return test_strings;

@@ -19,19 +19,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Checker.h"
+#include "Path.h"
+#include "Util.h"
 #include <iostream>
 #include <set>
 #include <sstream>
 #include <vector>
-#include "Checker.h"
-#include "Path.h"
-#include "Util.h"
 
 // Checker
 
-void 
-Checker::check()
-{
+void Checker::check() {
   check_anchor_usage();
   check_anchor_in_middle();
   check_charsets();
@@ -43,20 +41,18 @@ Checker::check()
 
 // CHECKER FUNCTIONS
 
-void
-Checker::check_anchor_usage()
-{
+void Checker::check_anchor_usage() {
   bool all_start_with_caret = false;
   bool all_end_with_dollar = false;
   bool warn_caret_start = false;
   bool warn_dollar_end = false;
-  
+
   // get end of line marker
   std::string eol = Util::get()->is_web_mode() ? "<br>" : "\n";
 
   bool is_first_string = true;
   std::string first_string;
-  std::vector <Path>::iterator path_iter;
+  std::vector<Path>::iterator path_iter;
   for (path_iter = paths.begin(); path_iter != paths.end(); path_iter++) {
 
     // check for leading carets and trailing dollars
@@ -74,7 +70,7 @@ Checker::check_anchor_usage()
     // print warning (but only for first occurrence of each anchor)
     if (!warn_caret_start) {
       if (all_start_with_caret && !start_with_caret) {
-	std::string curr_string = path_iter->get_test_string();
+        std::string curr_string = path_iter->get_test_string();
 
         std::stringstream s;
         s << "Some but not all strings start with a ^ anchor" << eol;
@@ -85,7 +81,7 @@ Checker::check_anchor_usage()
         warn_caret_start = true;
       }
       if (!all_start_with_caret && start_with_caret) {
-	std::string curr_string = path_iter->get_test_string();
+        std::string curr_string = path_iter->get_test_string();
 
         std::stringstream s;
         s << "Some but not all strings start with a ^ anchor" << eol;
@@ -98,7 +94,7 @@ Checker::check_anchor_usage()
     }
     if (!warn_dollar_end) {
       if (all_end_with_dollar && !end_with_dollar) {
-	std::string curr_string = path_iter->get_test_string();
+        std::string curr_string = path_iter->get_test_string();
 
         std::stringstream s;
         s << "Some but not all strings end with a $ anchor" << eol;
@@ -109,7 +105,7 @@ Checker::check_anchor_usage()
         warn_dollar_end = true;
       }
       if (!all_end_with_dollar && end_with_dollar) {
-	std::string curr_string = path_iter->get_test_string();
+        std::string curr_string = path_iter->get_test_string();
 
         std::stringstream s;
         s << "Some but not all strings end with a $ anchor" << eol;
@@ -123,69 +119,57 @@ Checker::check_anchor_usage()
   }
 }
 
-void
-Checker::check_anchor_in_middle()
-{
-  for (auto & path : paths) {
-    if (path.check_anchor_in_middle()) return;
+void Checker::check_anchor_in_middle() {
+  for (auto &path : paths) {
+    if (path.check_anchor_in_middle())
+      return;
   }
 }
 
-void
-Checker::check_charsets()
-{
-  for (auto & path : paths) {
+void Checker::check_charsets() {
+  for (auto &path : paths) {
     path.check_charsets();
   }
 }
 
-void
-Checker::check_optional_braces()
-{
-  for (auto & path : paths) {
+void Checker::check_optional_braces() {
+  for (auto &path : paths) {
     path.check_optional_braces();
   }
 }
 
-void
-Checker::check_wild_punctuation()
-{
-  for (auto & path : paths) {
+void Checker::check_wild_punctuation() {
+  for (auto &path : paths) {
     path.check_wild_punctuation();
   }
 }
 
-void
-Checker::check_repeat_punctuation()
-{
-  for (auto & path : paths) {
+void Checker::check_repeat_punctuation() {
+  for (auto &path : paths) {
     path.check_repeat_punctuation();
   }
 }
 
-void
-Checker::check_digit_too_optional()
-{
-  for (auto & path : paths) {
+void Checker::check_digit_too_optional() {
+  for (auto &path : paths) {
     path.check_digit_too_optional();
   }
 }
 
-std::string
-Checker::fix_anchors()
-{
+std::string Checker::fix_anchors() {
   std::string new_regex = "^(";
   std::string regex = Util::get()->get_regex();
 
-  std::vector <Token>::iterator vi;
+  std::vector<Token>::iterator vi;
   for (vi = tokens.begin(); vi != tokens.end(); vi++) {
     TokenType type = vi->type;
-    if (type == CARET || type == DOLLAR) continue;
+    if (type == CARET || type == DOLLAR)
+      continue;
     for (int i = vi->loc.first; i <= vi->loc.second; i++) {
       new_regex += regex[i];
     }
   }
-  
+
   new_regex += ")$";
 
   return new_regex;

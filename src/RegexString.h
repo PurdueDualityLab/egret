@@ -22,16 +22,15 @@
 #ifndef REGEX_STRING_H
 #define REGEX_STRING_H
 
+#include "CharSet.h"
+#include "Util.h"
 #include <set>
 #include <string>
 #include <vector>
-#include "CharSet.h"
-#include "Util.h"
 
 class RegexString {
 
 public:
-
   RegexString(CharSet *c, int lower, int upper) {
     char_set = c;
     repeat_lower = lower;
@@ -50,30 +49,36 @@ public:
 
   // property function - used by checker
   // TODO: These functions could be refactored
-  bool is_wild_candidate() { return char_set->is_wildcard() || char_set->is_complement(); }
-  bool is_valid_character(char c) { return char_set->is_wildcard() || char_set->is_valid_character(c); }
+  bool is_wild_candidate() {
+    return char_set->is_wildcard() || char_set->is_complement();
+  }
+  bool is_valid_character(char c) {
+    return char_set->is_wildcard() || char_set->is_valid_character(c);
+  }
 
   // repeat punctuation check functions
-  bool is_repeat_punc_candidate() { return char_set->is_repeat_punc_candidate(); }
+  bool is_repeat_punc_candidate() {
+    return char_set->is_repeat_punc_candidate();
+  }
   char get_repeat_punc_char() { return char_set->get_repeat_punc_char(); }
 
   // generate minimum iterations string
   void gen_min_iter_string(std::string &min_iter_string);
 
   // generate evil strings
-  std::vector <std::string> gen_evil_strings(const std::string& test_string, const std::set <char> &punct_marks);
+  std::vector<std::string> gen_evil_strings(const std::string &test_string,
+                                            const std::set<char> &punct_marks);
 
   // print the regex string
   void print();
 
 private:
-  CharSet *char_set;		// corresponding character set
-  int repeat_lower;     	// lower bound for string
-  int repeat_upper;     	// upper bound for string
+  CharSet *char_set; // corresponding character set
+  int repeat_lower;  // lower bound for string
+  int repeat_upper;  // upper bound for string
 
-  std::string prefix;            // prefix of test string before the loop
-  std::string substring;         // substring corresponding to this string
+  std::string prefix;    // prefix of test string before the loop
+  std::string substring; // substring corresponding to this string
 };
 
 #endif // REGEX_STRING_H
-

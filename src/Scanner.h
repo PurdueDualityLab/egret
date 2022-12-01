@@ -1,4 +1,4 @@
-/*  Scanner.h: scanner for regular expression, used by parser 
+/*  Scanner.h: scanner for regular expression, used by parser
 
     Copyright (C) 2016-2018  Eric Larson and Anna Kirk
     elarson@seattleu.edu
@@ -25,48 +25,46 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
-#include <string>
-#include <vector>
 #include "Stats.h"
 #include "Util.h"
+#include <string>
+#include <vector>
 
 // TODO: Separate token into a separate file?
 // TODO: Have the scanner stop after producing a list of tokens?
 
 // Types of tokens
-typedef enum
-{ 
-  ALTERNATION,		// |
-  STAR,			// *
-  PLUS,			// +
-  QUESTION,		// ?
-  REPEAT,		// {n}, {n,m}, {n,}, or {,m}
-  LEFT_PAREN,		// ( 
-  RIGHT_PAREN,		// )
-  CHARACTER,		// any "non-special" character
-  CHAR_CLASS,		// \w, \d, etc.
-  LEFT_BRACKET,		// [
-  RIGHT_BRACKET,	// ]
-  CARET,		// ^
-  DOLLAR,		// $
-  HYPHEN,		// - in character set
-  WORD_BOUNDARY,	// \b
-  NO_GROUP_EXT,		// (?:...)
-  NAMED_GROUP_EXT,	// (?P<name>...)
-  IGNORED_EXT,		// extensions that are ignored
-  BACKREFERENCE,        // backreferences
-  ERR			// error 
+typedef enum {
+  ALTERNATION,     // |
+  STAR,            // *
+  PLUS,            // +
+  QUESTION,        // ?
+  REPEAT,          // {n}, {n,m}, {n,}, or {,m}
+  LEFT_PAREN,      // (
+  RIGHT_PAREN,     // )
+  CHARACTER,       // any "non-special" character
+  CHAR_CLASS,      // \w, \d, etc.
+  LEFT_BRACKET,    // [
+  RIGHT_BRACKET,   // ]
+  CARET,           // ^
+  DOLLAR,          // $
+  HYPHEN,          // - in character set
+  WORD_BOUNDARY,   // \b
+  NO_GROUP_EXT,    // (?:...)
+  NAMED_GROUP_EXT, // (?P<name>...)
+  IGNORED_EXT,     // extensions that are ignored
+  BACKREFERENCE,   // backreferences
+  ERR              // error
 } TokenType;
 
-struct Token
-{
+struct Token {
   TokenType type;
-  Location loc;         // location in regular expression <start, end>
-  int repeat_lower;	// for REPEAT
-  int repeat_upper;	// for REPEAT (-1 for no limit)
-  char character;	// for CHARACTER and CHAR_CLASS
-  int group_num;        // for BACKREFERENCE
-  std::string group_name;    // for BACKREFERENCE and NAMED_GROUP_EXT
+  Location loc;           // location in regular expression <start, end>
+  int repeat_lower;       // for REPEAT
+  int repeat_upper;       // for REPEAT (-1 for no limit)
+  char character;         // for CHARACTER and CHAR_CLASS
+  int group_num;          // for BACKREFERENCE
+  std::string group_name; // for BACKREFERENCE and NAMED_GROUP_EXT
 };
 
 // A scanner class, encapsulates the input stream as a set of tokens
@@ -74,8 +72,7 @@ struct Token
 class Scanner {
 
 public:
-
-  std::vector <Token> get_tokens() { return tokens; }
+  std::vector<Token> get_tokens() { return tokens; }
 
   // scans through input string and creates a vector of tokens
   void init(std::string in);
@@ -121,17 +118,16 @@ public:
   void add_stats(Stats &stats);
 
 private:
-
-  std::vector <Token> tokens;	// stores the regular expression
-  unsigned index;		// iterator
+  std::vector<Token> tokens; // stores the regular expression
+  unsigned index;            // iterator
 
   // get next character from input string
   char get_next_char(std::string in, unsigned int &idx);
 
-  // process octal character 
+  // process octal character
   Token process_octal(std::string in, unsigned int &idx, char first_digit);
 
-  // process hexadecimal character 
+  // process hexadecimal character
   Token process_hex(std::string in, unsigned int &idx, int num_digits);
 
   // processes Python extensions for regular expressions
