@@ -327,9 +327,10 @@ std::unique_ptr<ParseNode> ParseTree::character() {
       group_loc = group_locs[group_num];
     }
 
-    Backref *backref = new Backref(group_name, group_num, group_loc);
+    // Backref *backref = new Backref(group_name, group_num, group_loc);
+    auto backref = std::make_unique<Backref>(group_name, group_num, group_loc);
     // character_node = new ParseNode(BACKREFERENCE_NODE, loc, backref);
-    character_node = std::make_unique<ParseNode>(BACKREFERENCE_NODE, loc, backref);
+    character_node = std::make_unique<ParseNode>(BACKREFERENCE_NODE, loc, std::move(backref));
     scanner.advance();
   } else {
     std::stringstream s;

@@ -88,10 +88,10 @@ public:
     regex_loop = r;
     processed = false;
   }
-  Edge(EdgeType t, Location l, Backref *b) {
+  Edge(EdgeType t, Location l, std::unique_ptr<Backref> b) {
     type = t;
     loc = l;
-    backref = b;
+    backref = std::move(b);
     processed = false;
   }
 
@@ -149,7 +149,7 @@ private:
   std::unique_ptr<CharSet> char_set;      // character set (for CHAR_SET_EDGE)
   RegexString *regex_str; // regex string (for STRING_EDGE)
   RegexLoop *regex_loop;  // regex loop (for BEGIN_LOOP_EDGE and END_LOOP_EDGE)
-  Backref *backref;       // backreference (for BACKREFERENCE_EDGE)
+  std::unique_ptr<Backref> backref;       // backreference (for BACKREFERENCE_EDGE)
 };
 
 #endif // EDGE_H

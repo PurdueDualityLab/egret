@@ -152,13 +152,13 @@ struct ParseNode {
     assert(t == CHARACTER_NODE);
   }
 
-  ParseNode(NodeType t, Location _loc, Backref *b)
+  ParseNode(NodeType t, Location _loc, std::unique_ptr<Backref> b)
   : type(t)
   , loc(std::move(_loc))
   , left()
   , right()
   , char_set()
-  , backref(b) {
+  , backref(std::move(b)) {
     assert(t == BACKREFERENCE_NODE);
   }
 
@@ -181,7 +181,7 @@ struct ParseNode {
   std::unique_ptr<CharSet> char_set;      // For CHAR_SET_NODE
   int repeat_lower{};       // For REPEAT_NODE
   int repeat_upper{};       // For REPEAT_NODE (-1 for no limit)
-  Backref *backref{};       // For BACKREFERENCE_NODE
+  std::unique_ptr<Backref> backref;       // For BACKREFERENCE_NODE
   std::string group_name; // For GROUP_NODE
 };
 

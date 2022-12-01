@@ -251,7 +251,7 @@ NFA NFA::build_nfa_ignored(std::unique_ptr<ParseNode> tree) {
 NFA NFA::build_nfa_backreference(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
   // Edge *edge = new Edge(BACKREFERENCE_EDGE, tree->loc, tree->backref);
-  auto edge = std::make_shared<Edge>(BACKREFERENCE_EDGE, tree->loc, tree->backref);
+  auto edge = std::make_shared<Edge>(BACKREFERENCE_EDGE, tree->loc, std::move(tree->backref));
   nfa.add_edge(0, 1, edge);
   return nfa;
 }
