@@ -203,7 +203,7 @@ void Scanner::init(std::string in) {
 
     case ']':
       // check if first in set --> matches right bracket character
-      if (in_set && tokens.size() > 0 && tokens.back().type == LEFT_BRACKET) {
+      if (in_set && !tokens.empty() && tokens.back().type == LEFT_BRACKET) {
         token.type = CHARACTER;
         token.character = in[idx];
       }
@@ -221,7 +221,7 @@ void Scanner::init(std::string in) {
 
     case '-':
       // check if first in set --> matches hyphen character
-      if (in_set && tokens.size() > 0 && tokens.back().type == LEFT_BRACKET) {
+      if (in_set && !tokens.empty() && tokens.back().type == LEFT_BRACKET) {
         token.type = CHARACTER;
         token.character = in[idx];
       }
@@ -291,7 +291,7 @@ void Scanner::init(std::string in) {
 
     case '?':
       // check if in indicates extension
-      if (tokens.size() > 0 && tokens.back().type == LEFT_PAREN) {
+      if (!tokens.empty() && tokens.back().type == LEFT_PAREN) {
         token = process_extension(in, idx);
       }
       // check if in set --> matches question mark character
@@ -491,7 +491,7 @@ Token Scanner::process_octal(std::string in, unsigned int &idx,
   return token;
 }
 
-Token Scanner::process_hex(std::string in, unsigned int &idx, int num_digits) {
+Token Scanner::process_hex(const std::string& in, unsigned int &idx, int num_digits) {
   Token token;
   token.loc.first = idx - 1;
 
@@ -530,7 +530,7 @@ Token Scanner::process_hex(std::string in, unsigned int &idx, int num_digits) {
   return token;
 }
 
-Token Scanner::process_extension(std::string in, unsigned int &idx) {
+Token Scanner::process_extension(const std::string& in, unsigned int &idx) {
   Token token;
   token.loc.first = idx;
   int start_loc = idx;
@@ -614,7 +614,7 @@ Token Scanner::process_extension(std::string in, unsigned int &idx) {
   return token;
 }
 
-Token Scanner::process_repeat(std::string in, unsigned int &idx) {
+Token Scanner::process_repeat(const std::string& in, unsigned int &idx) {
   // Based on execution of Python, the repeat quantifier must have one of these
   // forms: {n}  	: matches exactly n times {n,}	: matches at least n
   // times
@@ -642,7 +642,7 @@ Token Scanner::process_repeat(std::string in, unsigned int &idx) {
   token.character = '{';
 
   // Keep looping while reading in digits.
-  std::string count_str = "";
+  std::string count_str;
   char c = get_next_char(in, idx);
   while (isdigit(c)) {
     count_str += c;
@@ -652,7 +652,7 @@ Token Scanner::process_repeat(std::string in, unsigned int &idx) {
   // Stopping character is ',' --> lower bound complete
   if (c == ',') {
     // No lower bound number --> use -1 to represent no lower bound
-    if (count_str == "") {
+    if (count_str.empty()) {
       token.repeat_lower = -1;
     }
     // Otherwise store lower bound
@@ -665,7 +665,7 @@ Token Scanner::process_repeat(std::string in, unsigned int &idx) {
   // Stopping character is '}' --> Exact match instance of repeat quantifier
   else if (c == '}') {
     // No number --> string is {} --> literal match
-    if (count_str == "") {
+    if (count_str.empty()) {
       idx = current_idx;
       return token;
     }
@@ -699,7 +699,7 @@ Token Scanner::process_repeat(std::string in, unsigned int &idx) {
   // Stopping character is '}'
   if (c == '}') {
     // No upper bound number --> use -1 to represent no upper bound
-    if (count_str == "") {
+    if (count_str.empty()) {
       token.repeat_upper = -1;
     }
     // Otherwise store upper bound

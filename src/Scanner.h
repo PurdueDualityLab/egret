@@ -128,13 +128,13 @@ private:
   Token process_octal(std::string in, unsigned int &idx, char first_digit);
 
   // process hexadecimal character
-  Token process_hex(std::string in, unsigned int &idx, int num_digits);
+  Token process_hex(const std::string& in, unsigned int &idx, int num_digits);
 
   // processes Python extensions for regular expressions
-  Token process_extension(std::string in, unsigned int &idx);
+  Token process_extension(const std::string& in, unsigned int &idx);
 
   // process a repeat quantifier {}
-  Token process_repeat(std::string in, unsigned int &idx);
+  Token process_repeat(const std::string& in, unsigned int &idx);
 
   // returns string name of a token
   std::string token_type_to_str(TokenType type);

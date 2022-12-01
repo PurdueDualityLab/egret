@@ -41,10 +41,10 @@ RegexString::gen_evil_strings(const std::string &test_string,
   std::string suffix = test_string.substr(start);
 
   // insert one letter strings
-  evil_substrings.push_back("");
-  evil_substrings.push_back("_");
-  evil_substrings.push_back("6");
-  evil_substrings.push_back(" ");
+  evil_substrings.emplace_back("");
+  evil_substrings.emplace_back("_");
+  evil_substrings.emplace_back("6");
+  evil_substrings.emplace_back(" ");
 
   // insert string with just first character of substring
   evil_substrings.push_back(substring.substr(0, 1));
