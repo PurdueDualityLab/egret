@@ -27,7 +27,7 @@
 
 // run_engine: entry point into EGRET engine
 std::vector<std::string>
-run_engine(std::string regex, std::string base_substring,
+run_engine(const std::string &regex, const std::string &base_substring,
            bool check_mode = false, bool web_mode = false,
            bool debug_mode = false, bool stat_mode = false);
 

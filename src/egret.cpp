@@ -34,7 +34,7 @@
 #include <vector>
 
 std::vector<std::string>
-run_engine(std::string regex, std::string base_substring,
+run_engine(const std::string& regex, const std::string& base_substring,
            bool check_mode = false, bool web_mode = false,
            bool debug_mode = false, bool stat_mode = false) {
   Stats stats;
@@ -78,6 +78,9 @@ run_engine(std::string regex, std::string base_substring,
     if (stat_mode)
       tree.add_stats(stats);
 
+    // store stuff out of tree before it gets moved
+    auto punct_marks = tree.get_punct_marks();
+
     // build NFA
     NFA nfa;
     nfa.build(std::move(tree));
@@ -100,7 +103,7 @@ run_engine(std::string regex, std::string base_substring,
 
     // generate tests
     if (!check_mode) {
-      TestGenerator gen(paths, tree.get_punct_marks(), debug_mode);
+      TestGenerator gen(paths, punct_marks, debug_mode);
       test_strings = gen.gen_test_strings();
       if (stat_mode)
         gen.add_stats(stats);
@@ -116,7 +119,7 @@ run_engine(std::string regex, std::string base_substring,
   // Add alerts to front of list.
   std::vector<std::string> alerts = Util::get()->get_alerts();
   if (check_mode) {
-    if (alerts.size() == 0) {
+    if (alerts.empty()) {
       alerts.insert(alerts.begin(), "No violations detected.");
     }
     return alerts;
