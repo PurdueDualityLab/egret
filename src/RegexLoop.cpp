@@ -21,7 +21,6 @@
 
 #include "RegexLoop.h"
 #include <iostream>
-#include <set>
 #include <string>
 
 void RegexLoop::set_curr_substring(const std::string &test_string) {
@@ -40,7 +39,7 @@ std::string RegexLoop::get_substring() {
   return extra;
 }
 
-bool RegexLoop::is_opt_repeat() {
+bool RegexLoop::is_opt_repeat() const {
   return (repeat_lower == 0 && repeat_upper == 1);
 }
 
@@ -52,7 +51,7 @@ void RegexLoop::gen_min_iter_string(std::string &min_iter_string) {
   }
 }
 
-std::vector<std::string> RegexLoop::gen_evil_strings(std::string test_string) {
+std::vector<std::string> RegexLoop::gen_evil_strings(const std::string& test_string) {
   std::vector<std::string> evil_strings;
 
   // Create suffix: substring after the loop
@@ -124,7 +123,7 @@ std::vector<std::string> RegexLoop::gen_evil_strings(std::string test_string) {
   return evil_strings;
 }
 
-void RegexLoop::print() {
+void RegexLoop::print() const {
   if (repeat_lower == 0 && repeat_upper == -1)
     std::cout << "*";
   else if (repeat_lower == 1 && repeat_upper == -1)

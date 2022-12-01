@@ -36,7 +36,7 @@
 class NFA {
 
 public:
-  NFA() = default;
+  NFA() : size(0), initial(0), final(0) {};
   NFA(unsigned int _size, unsigned int _initial, unsigned int _final);
   NFA(const NFA &other);
   NFA &operator=(const NFA &other);

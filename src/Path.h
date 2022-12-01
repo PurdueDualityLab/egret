@@ -31,7 +31,7 @@ class Path {
 
 public:
   Path() = default;
-  Path(unsigned int initial) { states.push_back(initial); }
+  explicit Path(unsigned int initial) { states.push_back(initial); }
   std::string get_test_string() { return test_string; }
 
   // PATH CONSTRUCTION FUNCTIONS

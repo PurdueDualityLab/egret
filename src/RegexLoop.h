@@ -34,27 +34,27 @@ public:
   }
 
   // setters
-  void set_prefix(std::string p) { prefix = p; }
+  void set_prefix(const std::string &p) { prefix = p; }
   void set_substring_from_curr() { substring = curr_substring; }
-  void set_curr_prefix(std::string p) { curr_prefix = p; }
+  void set_curr_prefix(const std::string &p) { curr_prefix = p; }
   void set_curr_substring(const std::string &test_string);
 
   // getters
-  int get_repeat_lower() { return repeat_lower; }
-  int get_repeat_upper() { return repeat_upper; }
+  int get_repeat_lower() const { return repeat_lower; }
+  int get_repeat_upper() const { return repeat_upper; }
   std::string get_substring();
 
   // property functions - used by checker
-  bool is_opt_repeat();
+  bool is_opt_repeat() const;
 
   // generate minimum iteration string
   void gen_min_iter_string(std::string &min_iter_string);
 
   // generate evil strings
-  std::vector<std::string> gen_evil_strings(std::string test_string);
+  std::vector<std::string> gen_evil_strings(const std::string& test_string);
 
   // print the regex loop
-  void print();
+  void print() const;
 
 private:
   int repeat_lower; // lower bound for repeat quantifiers
