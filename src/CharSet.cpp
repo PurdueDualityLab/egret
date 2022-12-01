@@ -23,7 +23,6 @@
 #include "Path.h"
 #include "Util.h"
 #include <algorithm>
-#include <cassert>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -355,10 +354,16 @@ char CharSet::get_valid_character(char except) {
           return (except != ' ') ? ' ' : '\t';
         case 'W':
           return (except != ';') ? ';' : '&';
+#if 0
         case 'D':
           return (except != 'a') ? 'a' : 'b';
         case 'S':
           return (except != 'a') ? 'a' : 'b';
+        case '.':
+          return (except != 'a') ? 'a' : 'b';
+#endif
+        case 'D':
+        case 'S':
         case '.':
           return (except != 'a') ? 'a' : 'b';
         default: {
@@ -685,7 +690,7 @@ char CharSet::get_repeat_punc_char() {
 bool CharSet::is_digit_too_optional_candidate() {
   if (items.size() != 1)
     return false;
-  std::vector<CharSetItem>::iterator vi = items.begin();
+  auto vi = items.begin();
 
   if (vi->type == CHAR_CLASS_ITEM && vi->character == 'd')
     return true;
@@ -698,7 +703,7 @@ bool CharSet::is_digit_too_optional_candidate() {
   return false;
 }
 
-bool CharSet::is_good_range(char start, char end) {
+bool CharSet::is_good_range(char start, char end) const {
   if (start >= 'a' && start < 'z' && end > 'a' && end <= 'z')
     return true;
   if (start >= 'A' && start < 'Z' && end > 'A' && end <= 'Z')
@@ -970,7 +975,7 @@ std::string CharSet::fix_comma_bar_charset(Location loc, char elim) {
   return new_charset;
 }
 
-void CharSet::replace(std::string &str, std::string from, std::string to) {
+void CharSet::replace(std::string &str, const std::string& from, const std::string& to) {
   size_t start_pos = str.find(from);
   if (start_pos == std::string::npos)
     return;
@@ -988,7 +993,7 @@ std::string CharSet::replace_charset_with_parens(Location loc) {
 // TEST GENERATION FUNCTIONS
 
 std::vector<std::string>
-CharSet::gen_evil_strings(std::string test_string,
+CharSet::gen_evil_strings(const std::string& test_string,
                           const std::set<char> &punct_marks) {
   std::set<char> test_chars = create_test_chars(punct_marks);
   std::string suffix = test_string.substr(prefix.size() + 1);

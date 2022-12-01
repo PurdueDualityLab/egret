@@ -108,7 +108,7 @@ public:
   // TEST GENERATION FUNCTIONS
 
   // generate evil strings
-  std::vector<std::string> gen_evil_strings(std::string test_string,
+  std::vector<std::string> gen_evil_strings(const std::string& test_string,
                                             const std::set<char> &punct_marks);
 
   // PRINT FUNCTION
@@ -124,14 +124,14 @@ private:
 
   // checker functions
   bool only_has_punc(bool allow_spaces = false);
-  bool is_good_range(char start, char end);
+  bool is_good_range(char start, char end) const;
   bool has_upper_range();
   bool has_lower_range();
   bool has_digit_range();
   std::string fix_bad_range(Location loc);
   bool has_range(Location loc);
   std::string fix_comma_bar_charset(Location loc, char elim);
-  void replace(std::string &str, std::string from, std::string to);
+  static void replace(std::string &str, const std::string& from, const std::string& to);
   std::string replace_charset_with_parens(Location loc);
 
   // creates a set of test characters
