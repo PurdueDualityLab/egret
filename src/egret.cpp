@@ -80,7 +80,7 @@ run_engine(std::string regex, std::string base_substring,
 
     // build NFA
     NFA nfa;
-    nfa.build(tree);
+    nfa.build(std::move(tree));
     if (debug_mode)
       nfa.print();
     if (stat_mode)

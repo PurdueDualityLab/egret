@@ -59,13 +59,11 @@ void ParseTree::build(Scanner &_scanner) {
 //	|   '|'
 //      |   concat
 //
-ParseNode *ParseTree::expr() {
-  ParseNode *left, *right;
+std::unique_ptr<ParseNode> ParseTree::expr() {
+  std::unique_ptr<ParseNode> left, right;
 
   // check for alternation without a "left"
-  if (scanner.get_type() == ALTERNATION) {
-    left = NULL;
-  } else {
+  if (scanner.get_type() != ALTERNATION) {
     left = concat();
   }
 
@@ -79,48 +77,48 @@ ParseNode *ParseTree::expr() {
   scanner.advance();
 
   // check for lacking right
-  if (scanner.get_type() == RIGHT_PAREN || scanner.get_type() == ERR) {
-    right = NULL;
-  } else {
+  if (!(scanner.get_type() == RIGHT_PAREN || scanner.get_type() == ERR)) {
     right = expr();
   }
 
   // check for empty alternation clauses
   // both empty: abort with an error
-  if (left == NULL && right == NULL) {
+  if (left && right) {
     throw EgretException(
         "ERROR (pointless alternation): both clauses are empty");
   }
   // left empty: return right?
-  else if (left == NULL) {
-    ParseNode *expr_node = new ParseNode(REPEAT_NODE, loc, right, 0, 1);
+  else if (!left) {
+    // ParseNode *expr_node = new ParseNode(REPEAT_NODE, loc, right, 0, 1);
+    auto expr_node = std::make_unique<ParseNode>(REPEAT_NODE, loc, std::move(right), 0, 1);
     return expr_node;
   }
   // right empty: return left?
-  else if (right == NULL) {
-    ParseNode *expr_node = new ParseNode(REPEAT_NODE, loc, left, 0, 1);
-    return expr_node;
+  else if (!right) {
+    // ParseNode *expr_node = new ParseNode(REPEAT_NODE, loc, left, 0, 1);
+    return std::make_unique<ParseNode>(REPEAT_NODE, loc, std::move(left), 0, 1);
   }
 
   // otherwise return left | right
-  ParseNode *expr_node = new ParseNode(ALTERNATION_NODE, loc, left, right);
-  return expr_node;
+  // ParseNode *expr_node = new ParseNode(ALTERNATION_NODE, loc, left, right);
+  return std::make_unique<ParseNode>(ALTERNATION_NODE, loc, std::move(left), std::move(right));
 }
 
 // concat ::= rep concat
 //        |   rep
 //
-ParseNode *ParseTree::concat() {
+std::unique_ptr<ParseNode> ParseTree::concat() {
   // always a repetition node to the left
-  ParseNode *left = rep();
+  std::unique_ptr<ParseNode> left = rep();
 
   // check for concatenation
   if (scanner.is_concat()) {
-    ParseNode *right = concat();
+    std::unique_ptr<ParseNode> right = concat();
     int left_loc = left->loc.second;
     Location loc = std::make_pair(left_loc, left_loc + 1);
-    ParseNode *concat_node = new ParseNode(CONCAT_NODE, loc, left, right);
-    return concat_node;
+    // ParseNode *concat_node = new ParseNode(CONCAT_NODE, loc, left, right);
+    // return concat_node;
+    return std::make_unique<ParseNode>(CONCAT_NODE, loc, std::move(left), std::move(right));
   } else {
     return left;
   }
@@ -133,31 +131,35 @@ ParseNode *ParseTree::concat() {
 //      |   atom '{n,}'
 //      |   atom
 //
-ParseNode *ParseTree::rep() {
+std::unique_ptr<ParseNode> ParseTree::rep() {
   // first is always atom node
-  ParseNode *atom_node = atom();
+  std::unique_ptr<ParseNode> atom_node = atom();
   Location loc = scanner.get_loc();
 
   // then check for repetition character
   if (scanner.get_type() == STAR) {
     scanner.advance();
-    ParseNode *rep_node = new ParseNode(REPEAT_NODE, loc, atom_node, 0, -1);
-    return rep_node;
+    // ParseNode *rep_node = new ParseNode(REPEAT_NODE, loc, atom_node, 0, -1);
+    // return rep_node;
+    return std::make_unique<ParseNode>(REPEAT_NODE, loc, std::move(atom_node), 0, -1);
   } else if (scanner.get_type() == PLUS) {
     scanner.advance();
-    ParseNode *rep_node = new ParseNode(REPEAT_NODE, loc, atom_node, 1, -1);
-    return rep_node;
+    // ParseNode *rep_node = new ParseNode(REPEAT_NODE, loc, atom_node, 1, -1);
+    // return rep_node;
+    return std::make_unique<ParseNode>(REPEAT_NODE, loc, std::move(atom_node), 1, -1);
   } else if (scanner.get_type() == QUESTION) {
     scanner.advance();
-    ParseNode *rep_node = new ParseNode(REPEAT_NODE, loc, atom_node, 0, 1);
-    return rep_node;
+    // ParseNode *rep_node = new ParseNode(REPEAT_NODE, loc, atom_node, 0, 1);
+    // return rep_node;
+    return std::make_unique<ParseNode>(REPEAT_NODE, loc, std::move(atom_node), 0, 1);
   } else if (scanner.get_type() == REPEAT) {
     int lower = scanner.get_repeat_lower();
     int upper = scanner.get_repeat_upper();
     scanner.advance();
-    ParseNode *rep_node =
-        new ParseNode(REPEAT_NODE, loc, atom_node, lower, upper);
-    return rep_node;
+    // ParseNode *rep_node =
+    //     new ParseNode(REPEAT_NODE, loc, atom_node, lower, upper);
+    // return rep_node;
+    return std::make_unique<ParseNode>(REPEAT_NODE, loc, std::move(atom_node), lower, upper);
   } else {
     return atom_node;
   }
@@ -168,8 +170,8 @@ ParseNode *ParseTree::rep() {
 //	|   char_class
 // 	|   char_set
 //
-ParseNode *ParseTree::atom() {
-  ParseNode *atom_node;
+std::unique_ptr<ParseNode> ParseTree::atom() {
+  std::unique_ptr<ParseNode> atom_node;
 
   // check for group
   if (scanner.get_type() == LEFT_PAREN) {
@@ -200,10 +202,10 @@ ParseNode *ParseTree::atom() {
 //       | '(' IGNORED_EXT expr ')'
 //       | '(' IGNORED_EXT ')'
 //
-ParseNode *ParseTree::group() {
+std::unique_ptr<ParseNode> ParseTree::group() {
   bool ignored_group = false;
   bool normal_group = true;
-  std::string name = "";
+  std::string name;
   int start_loc = scanner.get_loc().second;
 
   if (scanner.get_type() != LEFT_PAREN) {
@@ -239,21 +241,21 @@ ParseNode *ParseTree::group() {
   }
 
   // Get the group expression
-  ParseNode *left;
+  std::unique_ptr<ParseNode> left;
   if (!ignored_group || scanner.get_type() != RIGHT_PAREN) {
     left = expr();
-  } else {
-    left = NULL;
   }
 
   // Create the group node
-  ParseNode *group_node;
+  std::unique_ptr<ParseNode> group_node;
   int end_loc = scanner.get_loc().first;
   Location loc = std::make_pair(start_loc, end_loc);
   if (ignored_group) {
-    group_node = new ParseNode(IGNORED_NODE, loc, NULL, NULL);
+    // group_node = new ParseNode(IGNORED_NODE, loc, NULL, NULL);
+    group_node = std::make_unique<ParseNode>(IGNORED_NODE, loc, std::unique_ptr<ParseNode>(), std::unique_ptr<ParseNode>());
   } else {
-    group_node = new ParseNode(GROUP_NODE, loc, name, left, nullptr);
+    // group_node = new ParseNode(GROUP_NODE, loc, name, std::move(left), nullptr);
+    group_node = std::make_unique<ParseNode>(GROUP_NODE, loc, name, std::move(left), std::unique_ptr<ParseNode>());
   }
 
   // Store group information
@@ -281,15 +283,16 @@ ParseNode *ParseTree::group() {
 //	     |	 '-'
 //	     |   WORD_BOUNDARY
 //
-ParseNode *ParseTree::character() {
-  ParseNode *character_node;
+std::unique_ptr<ParseNode> ParseTree::character() {
+  std::unique_ptr<ParseNode> character_node;
   Location loc = scanner.get_loc();
   TokenType type = scanner.get_type();
 
   if (type == CHARACTER) {
     char c = scanner.get_character();
     scanner.advance();
-    character_node = new ParseNode(CHARACTER_NODE, loc, c);
+    // character_node = new ParseNode(CHARACTER_NODE, loc, c);
+    character_node = std::make_unique<ParseNode>(CHARACTER_NODE, loc, c);
     if (ispunct(c)) {
       if (punct_marks.find(c) == punct_marks.end()) {
         punct_marks.insert(c);
@@ -297,19 +300,23 @@ ParseNode *ParseTree::character() {
     }
   } else if (type == CARET) {
     scanner.advance();
-    return new ParseNode(CARET_NODE, loc, NULL, NULL);
+    // return new ParseNode(CARET_NODE, loc, NULL, NULL);
+    return std::make_unique<ParseNode>(CARET_NODE, loc);
   } else if (type == DOLLAR) {
     scanner.advance();
-    return new ParseNode(DOLLAR_NODE, loc, NULL, NULL);
+    // return new ParseNode(DOLLAR_NODE, loc, NULL, NULL);
+    return std::make_unique<ParseNode>(DOLLAR_NODE, loc);
   } else if (type == HYPHEN) {
     scanner.advance();
-    character_node = new ParseNode(CHARACTER_NODE, loc, '-');
+    // character_node = new ParseNode(CHARACTER_NODE, loc, '-');
+    character_node = std::make_unique<ParseNode>(CHARACTER_NODE, loc, '-');
     if (punct_marks.find('-') == punct_marks.end()) {
       punct_marks.insert('-');
     }
   } else if (type == WORD_BOUNDARY) {
     scanner.advance();
-    return new ParseNode(IGNORED_NODE, loc, nullptr, nullptr);
+    // return new ParseNode(IGNORED_NODE, loc, nullptr, nullptr);
+    return std::make_unique<ParseNode>(IGNORED_NODE, loc);
   } else if (type == BACKREFERENCE) {
     int group_num = scanner.get_group_num();
     std::string group_name = scanner.get_group_name();
@@ -321,7 +328,8 @@ ParseNode *ParseTree::character() {
     }
 
     Backref *backref = new Backref(group_name, group_num, group_loc);
-    character_node = new ParseNode(BACKREFERENCE_NODE, loc, backref);
+    // character_node = new ParseNode(BACKREFERENCE_NODE, loc, backref);
+    character_node = std::make_unique<ParseNode>(BACKREFERENCE_NODE, loc, backref);
     scanner.advance();
   } else {
     std::stringstream s;
@@ -335,27 +343,29 @@ ParseNode *ParseTree::character() {
 
 // char_class ::= CHAR_CLASS
 //
-ParseNode *ParseTree::char_class() {
+std::unique_ptr<ParseNode> ParseTree::char_class() {
   Location loc = scanner.get_loc();
   char c = scanner.get_character();
   scanner.advance();
 
+  // TODO fix this
   CharSet *char_set = new CharSet();
 
-  CharSetItem char_set_item;
+  CharSetItem char_set_item {};
   char_set_item.type = CHAR_CLASS_ITEM;
   char_set_item.character = c;
   char_set->add_item(char_set_item);
 
-  ParseNode *char_set_node = new ParseNode(CHAR_SET_NODE, loc, char_set);
-  return char_set_node;
+  // ParseNode *char_set_node = new ParseNode(CHAR_SET_NODE, loc, char_set);
+  // return char_set_node;
+  return std::make_unique<ParseNode>(CHAR_SET_NODE, loc, char_set);
 }
 
 // char_set ::= '[' char_list ']'
 // 	    |   '[' '^' char_list ']'
 //
-ParseNode *ParseTree::char_set() {
-  ParseNode *char_set_node;
+std::unique_ptr<ParseNode> ParseTree::char_set() {
+  std::unique_ptr<ParseNode> char_set_node;
   bool is_complement = false;
   int start_loc = scanner.get_loc().second;
 
@@ -377,10 +387,12 @@ ParseNode *ParseTree::char_set() {
     char_set_node->char_set->set_complement(true);
   if (char_set_node->char_set->is_single_char() && !is_complement) {
     char c = char_set_node->char_set->get_valid_character();
-    delete char_set_node;
+    // delete char_set_node;
+    char_set_node.reset(nullptr);
     int end_loc = scanner.get_loc().first;
     Location loc = std::make_pair(start_loc, end_loc);
-    char_set_node = new ParseNode(CHARACTER_NODE, loc, c);
+    // char_set_node = new ParseNode(CHARACTER_NODE, loc, c);
+    char_set_node = std::make_unique<ParseNode>(CHARACTER_NODE, loc, c);
   }
 
   if (scanner.get_type() != RIGHT_BRACKET) {
@@ -397,15 +409,16 @@ ParseNode *ParseTree::char_set() {
 // char_list ::= list_item charlist
 // 	     |   list_item
 //
-ParseNode *ParseTree::char_list(int start_loc) {
+std::unique_ptr<ParseNode> ParseTree::char_list(int start_loc) {
   CharSetItem char_set_item = list_item();
-  ParseNode *char_set_node;
+  std::unique_ptr<ParseNode> char_set_node;
 
   // Check for end of list
   if (scanner.get_type() == RIGHT_BRACKET) {
     int end_loc = scanner.get_loc().first;
     Location loc = std::make_pair(start_loc, end_loc);
-    char_set_node = new ParseNode(CHAR_SET_NODE, loc, new CharSet());
+    // char_set_node = new ParseNode(CHAR_SET_NODE, loc, new CharSet());
+    char_set_node = std::make_unique<ParseNode>(CHAR_SET_NODE, loc, new CharSet());
   } else {
     char_set_node = char_list(start_loc);
   }
@@ -434,7 +447,7 @@ CharSetItem ParseTree::list_item() {
 //	          |   '-'
 //
 CharSetItem ParseTree::character_item() {
-  CharSetItem char_set_item;
+  CharSetItem char_set_item {};
   char_set_item.type = CHARACTER_ITEM;
 
   if (scanner.get_type() == CHARACTER) {
@@ -468,7 +481,7 @@ CharSetItem ParseTree::character_item() {
 // char_class_item ::= CHAR_CLASS
 //
 CharSetItem ParseTree::char_class_item() {
-  CharSetItem char_set_item;
+  CharSetItem char_set_item {};
   char_set_item.type = CHAR_CLASS_ITEM;
   char_set_item.character = scanner.get_character();
   scanner.advance();
@@ -478,7 +491,7 @@ CharSetItem ParseTree::char_class_item() {
 // char_range_item ::= CHARACTER '-' CHARACTER
 //
 CharSetItem ParseTree::char_range_item() {
-  CharSetItem char_set_item;
+  CharSetItem char_set_item {};
   char_set_item.type = CHAR_RANGE_ITEM;
 
   // TODO:  These seem like sanity checks - maybe assertions instead?
@@ -519,7 +532,7 @@ void ParseTree::print() {
   std::cout << std::endl;
 }
 
-void ParseTree::print_tree(ParseNode *node, unsigned offset) {
+void ParseTree::print_tree(const std::unique_ptr<ParseNode> &node, unsigned offset) {
   if (!node)
     return;
 
@@ -597,7 +610,7 @@ void ParseTree::add_stats(Stats &stats) {
   stats.add("PARSE_TREE", "Ignored nodes", tree_stats.ignored_nodes);
 }
 
-void ParseTree::gather_stats(ParseNode *node, ParseTreeStats &tree_stats) {
+void ParseTree::gather_stats(const std::unique_ptr<ParseNode> &node, ParseTreeStats &tree_stats) {
   if (!node)
     return;
 

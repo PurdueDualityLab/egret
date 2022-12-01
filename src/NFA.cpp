@@ -70,9 +70,9 @@ NFA &NFA::operator=(const NFA &other) {
   return *this;
 }
 
-void NFA::build(ParseTree &tree) {
+void NFA::build(ParseTree &&tree) {
   // Build NFA
-  NFA nfa = build_nfa_from_tree(tree.get_root());
+  NFA nfa = build_nfa_from_tree(std::move(tree.get_root()));
 
   // Copy NFA
   initial = nfa.initial;
@@ -81,49 +81,49 @@ void NFA::build(ParseTree &tree) {
   edge_table = nfa.edge_table;
 }
 
-NFA NFA::build_nfa_from_tree(ParseNode *tree) {
+NFA NFA::build_nfa_from_tree(std::unique_ptr<ParseNode> tree) {
   assert(tree);
 
   switch (tree->type) {
 
   case ALTERNATION_NODE:
-    return build_nfa_alternation(tree);
+    return build_nfa_alternation(std::move(tree));
 
   case CONCAT_NODE:
-    return build_nfa_concat(tree);
+    return build_nfa_concat(std::move(tree));
 
   case REPEAT_NODE:
-    return build_nfa_repeat(tree);
+    return build_nfa_repeat(std::move(tree));
 
   case GROUP_NODE:
-    return build_nfa_group(tree);
+    return build_nfa_group(std::move(tree));
 
   case CHARACTER_NODE:
-    return build_nfa_character(tree);
+    return build_nfa_character(std::move(tree));
 
   case CARET_NODE:
-    return build_nfa_caret(tree);
+    return build_nfa_caret(std::move(tree));
 
   case DOLLAR_NODE:
-    return build_nfa_dollar(tree);
+    return build_nfa_dollar(std::move(tree));
 
   case CHAR_SET_NODE:
-    return build_nfa_char_set(tree);
+    return build_nfa_char_set(std::move(tree));
 
   case IGNORED_NODE:
-    return build_nfa_ignored(tree);
+    return build_nfa_ignored(std::move(tree));
 
   case BACKREFERENCE_NODE:
-    return build_nfa_backreference(tree);
+    return build_nfa_backreference(std::move(tree));
 
   default:
     throw EgretException("ERROR (internal): Invalid node type in parse tree");
   }
 }
 
-NFA NFA::build_nfa_alternation(ParseNode *tree) {
-  NFA nfa1 = build_nfa_from_tree(tree->left);
-  NFA nfa2 = build_nfa_from_tree(tree->right);
+NFA NFA::build_nfa_alternation(std::unique_ptr<ParseNode> tree) {
+  NFA nfa1 = build_nfa_from_tree(std::move(tree->left));
+  NFA nfa2 = build_nfa_from_tree(std::move(tree->right));
 
   // How this is done: the new nfa must contain all the states in
   // nfa1 and nfa2, plus new initial and final states.
@@ -158,22 +158,22 @@ NFA NFA::build_nfa_alternation(ParseNode *tree) {
   return new_nfa;
 }
 
-NFA NFA::build_nfa_concat(ParseNode *tree) {
-  NFA nfa1 = build_nfa_from_tree(tree->left);
-  NFA nfa2 = build_nfa_from_tree(tree->right);
+NFA NFA::build_nfa_concat(std::unique_ptr<ParseNode> tree) {
+  NFA nfa1 = build_nfa_from_tree(std::move(tree->left));
+  NFA nfa2 = build_nfa_from_tree(std::move(tree->right));
   return concat_nfa(nfa1, nfa2);
 }
 
-NFA NFA::build_nfa_repeat(ParseNode *tree) {
+NFA NFA::build_nfa_repeat(std::unique_ptr<ParseNode> tree) {
   int repeat_lower = tree->repeat_lower;
   int repeat_upper = tree->repeat_upper;
 
   // if repeat represents a string, build a regex string instead
   if (is_regex_string(tree->left, repeat_lower, repeat_upper))
-    return build_nfa_string(tree);
+    return build_nfa_string(std::move(tree));
 
   // create NFA for repeated segment
-  NFA nfa = build_nfa_from_tree(tree->left);
+  NFA nfa = build_nfa_from_tree(std::move(tree->left));
 
   // make room for the new initial state
   nfa.shift_states(1);
@@ -198,7 +198,7 @@ NFA NFA::build_nfa_repeat(ParseNode *tree) {
   return nfa;
 }
 
-NFA NFA::build_nfa_string(ParseNode *tree) {
+NFA NFA::build_nfa_string(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1);
   // TODO fix this
   RegexString *regex_str = new RegexString(
@@ -210,45 +210,45 @@ NFA NFA::build_nfa_string(ParseNode *tree) {
   return nfa;
 }
 
-NFA NFA::build_nfa_group(ParseNode *tree) {
-  return build_nfa_from_tree(tree->left);
+NFA NFA::build_nfa_group(std::unique_ptr<ParseNode> tree) {
+  return build_nfa_from_tree(std::move(tree->left));
 }
 
-NFA NFA::build_nfa_character(ParseNode *tree) {
+NFA NFA::build_nfa_character(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   // Edge *edge = new Edge(CHARACTER_EDGE, tree->loc, tree->character);
   nfa.add_edge(0, 1, std::make_shared<Edge>(CHARACTER_EDGE, tree->loc, tree->character));
   return nfa;
 }
 
-NFA NFA::build_nfa_caret(ParseNode *tree) {
+NFA NFA::build_nfa_caret(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   // Edge *edge = new Edge(CARET_EDGE, tree->loc);
   nfa.add_edge(0, 1, std::make_shared<Edge>(CARET_EDGE, tree->loc));
   return nfa;
 }
 
-NFA NFA::build_nfa_dollar(ParseNode *tree) {
+NFA NFA::build_nfa_dollar(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   // Edge *edge = new Edge(DOLLAR_EDGE, tree->loc);
   nfa.add_edge(0, 1, std::make_shared<Edge>(DOLLAR_EDGE, tree->loc));
   return nfa;
 }
 
-NFA NFA::build_nfa_char_set(ParseNode *tree) {
+NFA NFA::build_nfa_char_set(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
   // Edge *edge = new Edge(CHAR_SET_EDGE, tree->loc, tree->char_set);
   nfa.add_edge(0, 1, std::make_shared<Edge>(CHAR_SET_EDGE, tree->loc, tree->char_set));
   return nfa;
 }
 
-NFA NFA::build_nfa_ignored(ParseNode *tree) {
+NFA NFA::build_nfa_ignored(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   nfa.add_edge(0, 1, Edge::make_epsilon());
   return nfa;
 }
 
-NFA NFA::build_nfa_backreference(ParseNode *tree) {
+NFA NFA::build_nfa_backreference(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
   // Edge *edge = new Edge(BACKREFERENCE_EDGE, tree->loc, tree->backref);
   auto edge = std::make_shared<Edge>(BACKREFERENCE_EDGE, tree->loc, tree->backref);
@@ -332,7 +332,7 @@ void NFA::append_empty_state() {
   size += 1;
 }
 
-bool NFA::is_regex_string(ParseNode *node, int repeat_lower, int repeat_upper) {
+bool NFA::is_regex_string(const std::unique_ptr<ParseNode> &node, int repeat_lower, int repeat_upper) {
   // Conditions for a string:
   // - Must be a repeated character set node
   // - Must be a * or + meaning that lower is 0 or 1, upper is -1 (no limit)
