@@ -201,11 +201,12 @@ NFA NFA::build_nfa_repeat(std::unique_ptr<ParseNode> tree) {
 NFA NFA::build_nfa_string(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1);
   // TODO fix this
-  RegexString *regex_str = new RegexString(
-      std::move(tree->left->char_set), tree->repeat_lower, tree->repeat_upper);
+  // RegexString *regex_str = new RegexString(
+  //     std::move(tree->left->char_set), tree->repeat_lower, tree->repeat_upper);
+  auto regex_str = std::make_unique<RegexString>(std::move(tree->left->char_set), tree->repeat_lower, tree->repeat_upper);
   Location loc = std::make_pair(tree->left->loc.first, tree->loc.second);
   // Edge *edge = new Edge(STRING_EDGE, loc, regex_str);
-  nfa.add_edge(0, 1, std::make_shared<Edge>(STRING_EDGE, loc, regex_str));
+  nfa.add_edge(0, 1, std::make_shared<Edge>(STRING_EDGE, loc, std::move(regex_str)));
 
   return nfa;
 }
