@@ -31,7 +31,7 @@
 
 // PATH CONSTRUCTION FUNCTIONS
 
-void Path::append(Edge *edge, unsigned int state) {
+void Path::append(const std::shared_ptr<Edge> &edge, unsigned int state) {
   edges.push_back(edge);
   states.push_back(state);
 }
@@ -42,10 +42,8 @@ void Path::remove_last() {
 }
 
 void Path::mark_path_visited(bool *visited) {
-  using namespace std;
-  vector<unsigned int>::iterator it;
-  for (it = states.begin(); it != states.end(); it++) {
-    visited[*it] = true;
+  for (unsigned int & state : states) {
+    visited[state] = true;
   }
 }
 
@@ -71,8 +69,8 @@ void Path::process_path() {
 // CHECKER FUNCTIONS
 
 bool Path::has_leading_caret() {
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    switch (edges[i]->get_type()) {
+  for (auto & edge : edges) {
+    switch (edge->get_type()) {
     case CARET_EDGE:
       return true;
     case BEGIN_LOOP_EDGE:
@@ -489,16 +487,16 @@ void Path::check_digit_too_optional() {
   bool prev_candidate = false;
   Location prev_loc;
 
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    Location curr_loc = edges[i]->get_loc();
-    if (edges[i]->is_zero_repeat_begin()) {
+  for (auto & edge : edges) {
+    Location curr_loc = edge->get_loc();
+    if (edge->is_zero_repeat_begin()) {
       prev_repeat = true;
       prev_candidate = false;
-    } else if (prev_repeat && edges[i]->is_digit_too_optional_candidate()) {
+    } else if (prev_repeat && edge->is_digit_too_optional_candidate()) {
       prev_repeat = false;
       prev_candidate = true;
       prev_loc = curr_loc;
-    } else if (prev_candidate && edges[i]->is_zero_repeat_end()) {
+    } else if (prev_candidate && edge->is_zero_repeat_end()) {
       prev_repeat = false;
       prev_candidate = false;
       std::string example = gen_min_iter_string();

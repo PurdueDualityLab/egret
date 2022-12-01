@@ -29,6 +29,7 @@
 #include "Util.h"
 #include <set>
 #include <string>
+#include <memory>
 
 class Path; // used to resolve a circular dependency
 
@@ -45,8 +46,12 @@ typedef enum {
 } EdgeType;
 
 class Edge {
-
 public:
+
+  static std::shared_ptr<Edge> make_epsilon() {
+    return std::make_shared<Edge>(EPSILON_EDGE);
+  }
+
   // constructors
   Edge() { processed = false; }
   Edge(EdgeType t) {

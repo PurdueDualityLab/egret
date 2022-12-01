@@ -29,24 +29,27 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+#include <memory>
 
-// TODO: No location information for epsilon edge.  OK?
-static Edge EPSILON = Edge(EPSILON_EDGE);
+NFA::NFA(unsigned int _size, unsigned int _initial, unsigned int _final)
+: size(_size)
+, initial(_initial)
+, final(_final) {
 
-NFA::NFA(unsigned int _size, unsigned int _initial, unsigned int _final) {
-  size = _size;
-  initial = _initial;
-  final = _final;
-
-  assert(initial < size);
-  assert(final < size);
+  assert(this->initial < this->size);
+  assert(this->final < this->size);
 
   // initialize edge table with an "empty graph"
-  std::vector<Edge *> empty_row(size, nullptr);
-  for (unsigned int i = 0; i < size; i++) {
-    edge_table.push_back(empty_row);
+  std::vector<std::shared_ptr<Edge>> empty_row(size);
+  for (unsigned int i = 0; i < this->size; i++) {
+    // edge_table.push_back(empty_row));
+    edge_table.emplace_back(size);
   }
 }
+
+/*
+ * TODO(cs): rule of zero: try to not explicitly define these ctors...
+ */
 
 NFA::NFA(const NFA &other) {
   size = other.size;
@@ -140,8 +143,8 @@ NFA NFA::build_nfa_alternation(ParseNode *tree) {
   new_nfa.fill_states(nfa1);
 
   // Set new initial state and the edges from it
-  new_nfa.add_edge(0, nfa1.initial, &EPSILON);
-  new_nfa.add_edge(0, nfa2.initial, &EPSILON);
+  new_nfa.add_edge(0, nfa1.initial, Edge::make_epsilon());
+  new_nfa.add_edge(0, nfa2.initial, Edge::make_epsilon());
   new_nfa.initial = 0;
 
   // Make up space for the new final state
@@ -149,8 +152,8 @@ NFA NFA::build_nfa_alternation(ParseNode *tree) {
 
   // Set new final state
   new_nfa.final = new_nfa.size - 1;
-  new_nfa.add_edge(nfa1.final, new_nfa.final, &EPSILON);
-  new_nfa.add_edge(nfa2.final, new_nfa.final, &EPSILON);
+  new_nfa.add_edge(nfa1.final, new_nfa.final, Edge::make_epsilon());
+  new_nfa.add_edge(nfa2.final, new_nfa.final, Edge::make_epsilon());
 
   return new_nfa;
 }
@@ -179,13 +182,14 @@ NFA NFA::build_nfa_repeat(ParseNode *tree) {
   nfa.append_empty_state();
 
   // create new loop
+  // TODO refactor this
   RegexLoop *regex_loop = new RegexLoop(repeat_lower, repeat_upper);
 
   // Util new edges
-  Edge *edge = new Edge(BEGIN_LOOP_EDGE, tree->loc, regex_loop);
-  nfa.add_edge(0, nfa.initial, edge); // new initial to old initial
-  edge = new Edge(END_LOOP_EDGE, tree->loc, regex_loop);
-  nfa.add_edge(nfa.final, nfa.size - 1, edge); // old final to new final
+  // Edge *edge = new Edge(BEGIN_LOOP_EDGE, tree->loc, regex_loop);
+  nfa.add_edge(0, nfa.initial, std::make_shared<Edge>(BEGIN_LOOP_EDGE, tree->loc, regex_loop)); // new initial to old initial
+  // edge = new Edge(END_LOOP_EDGE, tree->loc, regex_loop);
+  nfa.add_edge(nfa.final, nfa.size - 1, std::make_shared<Edge>(END_LOOP_EDGE, tree->loc, regex_loop)); // old final to new final
 
   // update states
   nfa.initial = 0;
@@ -196,11 +200,12 @@ NFA NFA::build_nfa_repeat(ParseNode *tree) {
 
 NFA NFA::build_nfa_string(ParseNode *tree) {
   NFA nfa(2, 0, 1);
+  // TODO fix this
   RegexString *regex_str = new RegexString(
       tree->left->char_set, tree->repeat_lower, tree->repeat_upper);
   Location loc = std::make_pair(tree->left->loc.first, tree->loc.second);
-  Edge *edge = new Edge(STRING_EDGE, loc, regex_str);
-  nfa.add_edge(0, 1, edge);
+  // Edge *edge = new Edge(STRING_EDGE, loc, regex_str);
+  nfa.add_edge(0, 1, std::make_shared<Edge>(STRING_EDGE, loc, regex_str));
 
   return nfa;
 }
@@ -211,46 +216,47 @@ NFA NFA::build_nfa_group(ParseNode *tree) {
 
 NFA NFA::build_nfa_character(ParseNode *tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
-  Edge *edge = new Edge(CHARACTER_EDGE, tree->loc, tree->character);
-  nfa.add_edge(0, 1, edge);
+  // Edge *edge = new Edge(CHARACTER_EDGE, tree->loc, tree->character);
+  nfa.add_edge(0, 1, std::make_shared<Edge>(CHARACTER_EDGE, tree->loc, tree->character));
   return nfa;
 }
 
 NFA NFA::build_nfa_caret(ParseNode *tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
-  Edge *edge = new Edge(CARET_EDGE, tree->loc);
-  nfa.add_edge(0, 1, edge);
+  // Edge *edge = new Edge(CARET_EDGE, tree->loc);
+  nfa.add_edge(0, 1, std::make_shared<Edge>(CARET_EDGE, tree->loc));
   return nfa;
 }
 
 NFA NFA::build_nfa_dollar(ParseNode *tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
-  Edge *edge = new Edge(DOLLAR_EDGE, tree->loc);
-  nfa.add_edge(0, 1, edge);
+  // Edge *edge = new Edge(DOLLAR_EDGE, tree->loc);
+  nfa.add_edge(0, 1, std::make_shared<Edge>(DOLLAR_EDGE, tree->loc));
   return nfa;
 }
 
 NFA NFA::build_nfa_char_set(ParseNode *tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
-  Edge *edge = new Edge(CHAR_SET_EDGE, tree->loc, tree->char_set);
-  nfa.add_edge(0, 1, edge);
+  // Edge *edge = new Edge(CHAR_SET_EDGE, tree->loc, tree->char_set);
+  nfa.add_edge(0, 1, std::make_shared<Edge>(CHAR_SET_EDGE, tree->loc, tree->char_set));
   return nfa;
 }
 
 NFA NFA::build_nfa_ignored(ParseNode *tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
-  nfa.add_edge(0, 1, &EPSILON);
+  nfa.add_edge(0, 1, Edge::make_epsilon());
   return nfa;
 }
 
 NFA NFA::build_nfa_backreference(ParseNode *tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
-  Edge *edge = new Edge(BACKREFERENCE_EDGE, tree->loc, tree->backref);
+  // Edge *edge = new Edge(BACKREFERENCE_EDGE, tree->loc, tree->backref);
+  auto edge = std::make_shared<Edge>(BACKREFERENCE_EDGE, tree->loc, tree->backref);
   nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-void NFA::add_edge(unsigned int from, unsigned int to, Edge *edge) {
+void NFA::add_edge(unsigned int from, unsigned int to, const std::shared_ptr<Edge> &edge) {
   assert(from < size);
   assert(to < size);
 
@@ -271,7 +277,7 @@ NFA NFA::concat_nfa(NFA nfa1, NFA nfa2) {
   new_nfa.fill_states(nfa1);
 
   // add edge from nfa1 to nfa2
-  new_nfa.add_edge(nfa1.final, new_nfa.initial, &EPSILON);
+  new_nfa.add_edge(nfa1.final, new_nfa.initial, Edge::make_epsilon());
 
   // set the new initial state (the final state stays nfa2's final state,
   // and was already copied)
@@ -287,8 +293,8 @@ void NFA::shift_states(unsigned int shift) {
     return;
 
   // create a new, empty edge table (of the new size)
-  std::vector<Edge *> empty_row(new_size, NULL);
-  std::vector<std::vector<Edge *>> new_edge_table(new_size, empty_row);
+  std::vector<std::shared_ptr<Edge>> empty_row(new_size);
+  std::vector<std::vector<std::shared_ptr<Edge>>> new_edge_table(new_size, empty_row);
 
   // copy all the edges to the new table, at their new locations
   for (unsigned int i = 0; i < size; i++) {
@@ -316,7 +322,7 @@ void NFA::fill_states(const NFA &other) {
 
 void NFA::append_empty_state() {
   // append a new row (already with a larger size)
-  std::vector<Edge *> empty_row(size + 1, nullptr);
+  std::vector<std::shared_ptr<Edge>> empty_row(size + 1);
   edge_table.push_back(empty_row);
 
   // append a new column
@@ -372,8 +378,8 @@ void NFA::traverse(unsigned int curr_state, Path path, std::vector<Path> &paths,
 
   // for each adjacent state, find all paths
   for (unsigned int next_state = 0; next_state < size; next_state++) {
-    Edge *edge = edge_table[curr_state][next_state];
-    if (edge == nullptr)
+    auto edge = edge_table[curr_state][next_state];
+    if (!edge)
       continue;
     path.append(edge, next_state);
     traverse(next_state, path, paths, visited);
@@ -394,8 +400,8 @@ void NFA::print() {
     std::cout << "State " << from << ": ";
     std::cout << std::endl;
     for (unsigned int to = 0; to < size; to++) {
-      Edge *edge = edge_table[from][to];
-      if (edge != nullptr) {
+      auto edge = edge_table[from][to];
+      if (edge) {
         std::cout << "  To state " << to << " on ";
         edge->print();
       }
@@ -419,8 +425,8 @@ void NFA::add_stats(Stats &stats) {
 
   for (unsigned int from = 0; from < size; from++) {
     for (unsigned int to = 0; to < size; to++) {
-      Edge *edge = edge_table[from][to];
-      if (edge != NULL) {
+      auto edge = edge_table[from][to];
+      if (edge) {
         edge_count++;
         switch (edge->get_type()) {
         case CHARACTER_EDGE:

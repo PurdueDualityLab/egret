@@ -31,6 +31,7 @@
 #include "Path.h"
 #include "Stats.h"
 #include <vector>
+#include <memory>
 
 class NFA {
 
@@ -56,7 +57,7 @@ private:
   unsigned int size;                           // number of states
   unsigned int initial;                        // initial state
   unsigned int final;                          // final state
-  std::vector<std::vector<Edge *>> edge_table; // edge table
+  std::vector<std::vector<std::shared_ptr<Edge>>> edge_table; // edge table
 
   // builds an NFA from tree
   NFA build_nfa_from_tree(ParseNode *tree);
@@ -95,7 +96,7 @@ private:
   NFA build_nfa_backreference(ParseNode *tree);
 
   // adds an edge to edge table
-  void add_edge(unsigned int from, unsigned int to, Edge *edge);
+  void add_edge(unsigned int from, unsigned int to, const std::shared_ptr<Edge> &edge);
 
   // concatenates two NFAs together
   NFA concat_nfa(NFA nfa1, NFA nfa2);

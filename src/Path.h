@@ -37,7 +37,7 @@ public:
   // PATH CONSTRUCTION FUNCTIONS
 
   // adds an edge and the destination state to the path
-  void append(Edge *edge, unsigned int state);
+  void append(const std::shared_ptr<Edge> &edge, unsigned int state);
 
   // removes the last edge and state
   void remove_last();
@@ -101,7 +101,7 @@ public:
 
 private:
   std::vector<unsigned int> states; // list of states
-  std::vector<Edge *> edges;        // list of edges
+  std::vector<std::shared_ptr<Edge>> edges;        // list of edges
   std::string test_string;          // test string associated with path
   std::vector<unsigned int>
       evil_edges; // list of evil edges that need processing
