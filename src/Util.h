@@ -115,7 +115,7 @@ public:
   std::vector<std::string> get_alerts() { return alerts; }
 
   // Alerts
-  void add_alert(Alert alert);
+  void add_alert(const Alert& alert);
 
   // TODO: Possibly create a new regex class where the "fixing" functions
   // reside?

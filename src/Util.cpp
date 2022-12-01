@@ -22,6 +22,7 @@
 #include "Util.h"
 #include <sstream>
 #include <string>
+#include <utility>
 
 // global static pointer for singleton class
 Util *Util::inst = nullptr;
@@ -33,15 +34,15 @@ Util *Util::get() {
 }
 
 void Util::init(std::string r, bool c, bool w, std::string s) {
-  regex = r;
+  regex = std::move(r);
   check_mode = c;
   web_mode = w;
-  base_substring = s;
+  base_substring = std::move(s);
   alerts.clear();
   prev_alerts.clear();
 }
 
-void Util::add_alert(Alert alert) {
+void Util::add_alert(const Alert& alert) {
   // Create type, location pair
   std::pair<std::string, int> alert_pair =
       make_pair(alert.type, alert.loc1.first);

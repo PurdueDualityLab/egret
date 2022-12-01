@@ -23,22 +23,23 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 void Stats::add(std::string tag, std::string name, int value) {
-  Stat stat = {tag, name, value};
+  Stat stat = {std::move(tag), std::move(name), value};
   statList.push_back(stat);
 }
 
 void Stats::print() {
   const int WIDTH = 30;
 
-  std::string prev_tag = "";
+  std::string prev_tag;
   std::vector<Stat>::iterator it;
   for (it = statList.begin(); it != statList.end(); it++) {
 
     // print divider line between different tags
-    if (it->tag != prev_tag && prev_tag != "") {
+    if (it->tag != prev_tag && !prev_tag.empty()) {
       for (int i = 0; i < WIDTH + 8; i++)
         std::cout << "-";
       std::cout << std::endl;
