@@ -202,7 +202,7 @@ NFA NFA::build_nfa_string(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1);
   // TODO fix this
   RegexString *regex_str = new RegexString(
-      tree->left->char_set, tree->repeat_lower, tree->repeat_upper);
+      std::move(tree->left->char_set), tree->repeat_lower, tree->repeat_upper);
   Location loc = std::make_pair(tree->left->loc.first, tree->loc.second);
   // Edge *edge = new Edge(STRING_EDGE, loc, regex_str);
   nfa.add_edge(0, 1, std::make_shared<Edge>(STRING_EDGE, loc, regex_str));
@@ -238,7 +238,7 @@ NFA NFA::build_nfa_dollar(std::unique_ptr<ParseNode> tree) {
 NFA NFA::build_nfa_char_set(std::unique_ptr<ParseNode> tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
   // Edge *edge = new Edge(CHAR_SET_EDGE, tree->loc, tree->char_set);
-  nfa.add_edge(0, 1, std::make_shared<Edge>(CHAR_SET_EDGE, tree->loc, tree->char_set));
+  nfa.add_edge(0, 1, std::make_shared<Edge>(CHAR_SET_EDGE, tree->loc, std::move(tree->char_set)));
   return nfa;
 }
 

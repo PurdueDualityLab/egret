@@ -111,7 +111,7 @@ struct ParseNode {
   , loc(std::move(loc))
   , left()
   , right()
-  , char_set(nullptr)
+  , char_set()
   {}
 
   ParseNode(NodeType t, Location _loc, std::unique_ptr<ParseNode> l, std::unique_ptr<ParseNode> r)
@@ -119,7 +119,7 @@ struct ParseNode {
   , loc(std::move(_loc))
   , left(std::move(l))
   , right(std::move(r))
-  , char_set(nullptr) {
+  , char_set() {
   }
 
   ParseNode(NodeType t, Location _loc, std::string _name, std::unique_ptr<ParseNode> l,
@@ -128,17 +128,17 @@ struct ParseNode {
   , loc(std::move(_loc))
   , left(std::move(l))
   , right(std::move(r))
-  , char_set(nullptr)
+  , char_set()
   , group_name(std::move(_name)) {
     assert(t == GROUP_NODE);
   }
 
-  ParseNode(NodeType t, Location _loc, CharSet *c)
+  ParseNode(NodeType t, Location _loc, std::unique_ptr<CharSet> c)
   : type(t)
   , loc(std::move(_loc))
   , left()
   , right()
-  , char_set(c) {
+  , char_set(std::move(c)) {
     assert(t == CHAR_SET_NODE);
   }
 
@@ -148,7 +148,7 @@ struct ParseNode {
   , left()
   , right()
   , character(c)
-  , char_set(nullptr) {
+  , char_set() {
     assert(t == CHARACTER_NODE);
   }
 
@@ -157,7 +157,7 @@ struct ParseNode {
   , loc(std::move(_loc))
   , left()
   , right()
-  , char_set(nullptr)
+  , char_set()
   , backref(b) {
     assert(t == BACKREFERENCE_NODE);
   }
@@ -167,7 +167,7 @@ struct ParseNode {
   , loc(std::move(_loc))
   , left(std::move(l))
   , right()
-  , char_set(nullptr)
+  , char_set()
   , repeat_lower(lower)
   , repeat_upper(upper) {
     assert(t == REPEAT_NODE);
@@ -178,7 +178,7 @@ struct ParseNode {
   std::unique_ptr<ParseNode> left;
   std::unique_ptr<ParseNode> right;
   char character{};         // For CHARACTER_NODE
-  CharSet *char_set;      // For CHAR_SET_NODE
+  std::unique_ptr<CharSet> char_set;      // For CHAR_SET_NODE
   int repeat_lower{};       // For REPEAT_NODE
   int repeat_upper{};       // For REPEAT_NODE (-1 for no limit)
   Backref *backref{};       // For BACKREFERENCE_NODE

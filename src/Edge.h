@@ -70,10 +70,10 @@ public:
     character = c;
     processed = false;
   }
-  Edge(EdgeType t, Location l, CharSet *c) {
+  Edge(EdgeType t, Location l, std::unique_ptr<CharSet> c) {
     type = t;
     loc = l;
-    char_set = c;
+    char_set = std::move(c);
     processed = false;
   }
   Edge(EdgeType t, Location l, RegexString *r) {
@@ -99,7 +99,7 @@ public:
   EdgeType get_type() { return type; }
   Location get_loc() { return loc; }
   char get_character() { return character; }
-  CharSet *get_charset() {
+  std::unique_ptr<CharSet> &get_charset() {
     if (type == STRING_EDGE)
       return regex_str->get_charset();
     return char_set;
@@ -146,7 +146,7 @@ private:
   Location loc;           // location within original regex
   bool processed;         // set if edge is processed
   char character;         // character (for CHARACTER_EDGE)
-  CharSet *char_set;      // character set (for CHAR_SET_EDGE)
+  std::unique_ptr<CharSet> char_set;      // character set (for CHAR_SET_EDGE)
   RegexString *regex_str; // regex string (for STRING_EDGE)
   RegexLoop *regex_loop;  // regex loop (for BEGIN_LOOP_EDGE and END_LOOP_EDGE)
   Backref *backref;       // backreference (for BACKREFERENCE_EDGE)

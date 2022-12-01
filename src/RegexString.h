@@ -27,12 +27,13 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <memory>
 
 class RegexString {
 
 public:
-  RegexString(CharSet *c, int lower, int upper) {
-    char_set = c;
+  RegexString(std::unique_ptr<CharSet> c, int lower, int upper) {
+    char_set = std::move(c);
     repeat_lower = lower;
     repeat_upper = upper;
   }
@@ -45,7 +46,7 @@ public:
   std::string get_substring() { return substring; }
   int get_repeat_lower() { return repeat_lower; }
   int get_repeat_upper() { return repeat_upper; }
-  CharSet *get_charset() { return char_set; }
+  std::unique_ptr<CharSet> &get_charset() { return char_set; }
 
   // property function - used by checker
   // TODO: These functions could be refactored
@@ -73,7 +74,7 @@ public:
   void print();
 
 private:
-  CharSet *char_set; // corresponding character set
+  std::unique_ptr<CharSet> char_set; // corresponding character set
   int repeat_lower;  // lower bound for string
   int repeat_upper;  // upper bound for string
 

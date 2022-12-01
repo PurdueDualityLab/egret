@@ -152,7 +152,7 @@ void Path::check_charsets() {
   for (auto &edge : edges) {
 
     if (edge->get_type() == CHAR_SET_EDGE || edge->get_type() == STRING_EDGE) {
-      CharSet *charset_ptr = edge->get_charset();
+      auto &charset_ptr = edge->get_charset();
       Location loc = edge->get_loc();
 
       // check the character set

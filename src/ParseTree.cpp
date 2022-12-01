@@ -349,7 +349,8 @@ std::unique_ptr<ParseNode> ParseTree::char_class() {
   scanner.advance();
 
   // TODO fix this
-  CharSet *char_set = new CharSet();
+  // CharSet *char_set = new CharSet();
+  auto char_set = std::make_unique<CharSet>();
 
   CharSetItem char_set_item {};
   char_set_item.type = CHAR_CLASS_ITEM;
@@ -358,7 +359,7 @@ std::unique_ptr<ParseNode> ParseTree::char_class() {
 
   // ParseNode *char_set_node = new ParseNode(CHAR_SET_NODE, loc, char_set);
   // return char_set_node;
-  return std::make_unique<ParseNode>(CHAR_SET_NODE, loc, char_set);
+  return std::make_unique<ParseNode>(CHAR_SET_NODE, loc, std::move(char_set));
 }
 
 // char_set ::= '[' char_list ']'
@@ -418,7 +419,7 @@ std::unique_ptr<ParseNode> ParseTree::char_list(int start_loc) {
     int end_loc = scanner.get_loc().first;
     Location loc = std::make_pair(start_loc, end_loc);
     // char_set_node = new ParseNode(CHAR_SET_NODE, loc, new CharSet());
-    char_set_node = std::make_unique<ParseNode>(CHAR_SET_NODE, loc, new CharSet());
+    char_set_node = std::make_unique<ParseNode>(CHAR_SET_NODE, loc, std::make_unique<CharSet>());
   } else {
     char_set_node = char_list(start_loc);
   }
