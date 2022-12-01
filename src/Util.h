@@ -26,6 +26,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <memory>
 
 // Location
 typedef std::pair<int, int> Location;
@@ -104,7 +105,7 @@ struct Alert {
 class Util {
 
 public:
-  static Util *get();
+  static std::shared_ptr<Util> get();
 
   void init(std::string r, bool c, bool w, std::string s);
 
@@ -121,7 +122,7 @@ public:
   // reside?
 private:
   Util() = default; // singleton class, private constructor
-  static Util *inst;
+  static std::shared_ptr<Util> inst;
 
   // Global options
   bool check_mode{};

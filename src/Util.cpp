@@ -25,11 +25,11 @@
 #include <utility>
 
 // global static pointer for singleton class
-Util *Util::inst = nullptr;
+std::shared_ptr<Util> Util::inst;
 
-Util *Util::get() {
+std::shared_ptr<Util> Util::get() {
   if (inst == nullptr)
-    inst = new Util;
+    inst = std::shared_ptr<Util>(new Util);
   return inst;
 }
 

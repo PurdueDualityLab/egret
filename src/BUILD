@@ -8,6 +8,7 @@ cc_library(
         ],
     ),
     hdrs = glob(["*.h"]),
+    include_prefix = "egret",
     visibility = ["//visibility:public"],
 )
 
