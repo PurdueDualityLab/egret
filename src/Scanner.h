@@ -29,7 +29,6 @@
 #include <vector>
 #include "Stats.h"
 #include "Util.h"
-using namespace std;
 
 // TODO: Separate token into a separate file?
 // TODO: Have the scanner stop after producing a list of tokens?
@@ -67,7 +66,7 @@ struct Token
   int repeat_upper;	// for REPEAT (-1 for no limit)
   char character;	// for CHARACTER and CHAR_CLASS
   int group_num;        // for BACKREFERENCE
-  string group_name;    // for BACKREFERENCE and NAMED_GROUP_EXT
+  std::string group_name;    // for BACKREFERENCE and NAMED_GROUP_EXT
 };
 
 // A scanner class, encapsulates the input stream as a set of tokens
@@ -76,17 +75,17 @@ class Scanner {
 
 public:
 
-  vector <Token> get_tokens() { return tokens; }
+  std::vector <Token> get_tokens() { return tokens; }
 
   // scans through input string and creates a vector of tokens
-  void init(string in);
+  void init(std::string in);
 
   // TODO: Consider returning a token instead of all these specialized functions
   // returns type for current token
   TokenType get_type();
 
   // returns type string for current token
-  string get_type_str();
+  std::string get_type_str();
 
   // returns location for current token
   Location get_loc();
@@ -104,7 +103,7 @@ public:
   int get_group_num();
 
   // returns the group name for a backreference or named group
-  string get_group_name();
+  std::string get_group_name();
 
   // advance to the next token
   void advance();
@@ -123,26 +122,26 @@ public:
 
 private:
 
-  vector <Token> tokens;	// stores the regular expression
+  std::vector <Token> tokens;	// stores the regular expression
   unsigned index;		// iterator
 
   // get next character from input string
-  char get_next_char(string in, unsigned int &idx);
+  char get_next_char(std::string in, unsigned int &idx);
 
   // process octal character 
-  Token process_octal(string in, unsigned int &idx, char first_digit);
+  Token process_octal(std::string in, unsigned int &idx, char first_digit);
 
   // process hexadecimal character 
-  Token process_hex(string in, unsigned int &idx, int num_digits);
+  Token process_hex(std::string in, unsigned int &idx, int num_digits);
 
   // processes Python extensions for regular expressions
-  Token process_extension(string in, unsigned int &idx);
+  Token process_extension(std::string in, unsigned int &idx);
 
   // process a repeat quantifier {}
-  Token process_repeat(string in, unsigned int &idx);
+  Token process_repeat(std::string in, unsigned int &idx);
 
   // returns string name of a token
-  string token_type_to_str(TokenType type);
+  std::string token_type_to_str(TokenType type);
 };
 
 #endif // SCANNER_H

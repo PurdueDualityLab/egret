@@ -23,20 +23,19 @@
 #include <set>
 #include <string>
 #include "RegexLoop.h"
-using namespace std;
 
 void
-RegexLoop::set_curr_substring(string test_string)
+RegexLoop::set_curr_substring(const std::string& test_string)
 {
   curr_substring = test_string.substr(curr_prefix.size());
 }
 
-string
+std::string
 RegexLoop::get_substring()
 {
   // The test string already contains one iteration from the elements in the loop.
   // This function return additional iterations if the lower bound is greater than 1.
-  string extra;
+  std::string extra;
   for (int j = 1; j < repeat_lower; j++) {
     extra += curr_substring;
   }
@@ -51,7 +50,7 @@ RegexLoop::is_opt_repeat()
 }
 
 void
-RegexLoop::gen_min_iter_string(string &min_iter_string)
+RegexLoop::gen_min_iter_string(std::string &min_iter_string)
 {
   if (repeat_lower != 0) {
     min_iter_string += get_substring();
@@ -61,21 +60,21 @@ RegexLoop::gen_min_iter_string(string &min_iter_string)
   }
 }
 
-vector <string>
-RegexLoop::gen_evil_strings(string test_string)
+std::vector <std::string>
+RegexLoop::gen_evil_strings(std::string test_string)
 {
-  vector <string> evil_strings;
+  std::vector <std::string> evil_strings;
 
   // Create suffix: substring after the loop
   int start = prefix.size() + substring.size();
-  string suffix = test_string.substr(start);
+  std::string suffix = test_string.substr(start);
 
   // Create string with one less iteration
-  string one_less_string = prefix;
+  std::string one_less_string = prefix;
   one_less_string += suffix;
 
   // Create string with one more iteration
-  string one_more_string = prefix;
+  std::string one_more_string = prefix;
   one_more_string += substring;
   one_more_string += substring;
   one_more_string += suffix;
@@ -98,19 +97,19 @@ RegexLoop::gen_evil_strings(string test_string)
       // has one substring less than lower bound.
       int base_iterations = repeat_lower;
       if (base_iterations == 0) base_iterations = 1;
-      string path_elements = substring;
+      std::string path_elements = substring;
       for (int i = base_iterations; i < repeat_upper; i++) {
         path_elements += substring;
       }
 
       // Add the upper bound string.
-      string upper_bound_string = prefix;
+      std::string upper_bound_string = prefix;
       upper_bound_string += path_elements;
       upper_bound_string += suffix;
       evil_strings.push_back(upper_bound_string);
 
       // Add the string with one more iteration past the upper bound.
-      string past_bound_string = prefix;
+      std::string past_bound_string = prefix;
       past_bound_string += path_elements;
       past_bound_string += substring;
       past_bound_string += suffix;
@@ -138,15 +137,15 @@ void
 RegexLoop::print()
 {
   if (repeat_lower == 0 && repeat_upper == -1)
-    cout << "*";
+    std::cout << "*";
   else if (repeat_lower == 1 && repeat_upper == -1)
-    cout << "+";
+    std::cout << "+";
   else if (repeat_lower == 0 && repeat_upper == 1)
-    cout << "?";
+    std::cout << "?";
   else if (repeat_upper == -1)
-    cout << "{" << repeat_lower << ",}";
+    std::cout << "{" << repeat_lower << ",}";
   else if (repeat_lower == repeat_upper)
-    cout << "{" << repeat_lower << "}";
+    std::cout << "{" << repeat_lower << "}";
   else 
-    cout << "{" << repeat_lower << "," << repeat_upper << "}";
+    std::cout << "{" << repeat_lower << "," << repeat_upper << "}";
 }

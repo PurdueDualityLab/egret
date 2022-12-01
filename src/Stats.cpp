@@ -24,10 +24,9 @@
 #include <string>
 #include <vector>
 #include "Stats.h"
-using namespace std;
 
 void
-Stats::add(string tag, string name, int value)
+Stats::add(std::string tag, std::string name, int value)
 {
   Stat stat = { tag, name, value };
   statList.push_back(stat);
@@ -38,17 +37,17 @@ Stats::print()
 {
   const int WIDTH = 30;
 
-  string prev_tag = "";
-  vector <Stat>::iterator it;
+  std::string prev_tag = "";
+  std::vector <Stat>::iterator it;
   for (it = statList.begin(); it != statList.end(); it++) {
 
     // print divider line between different tags
     if (it->tag != prev_tag && prev_tag != "") {
-      for (int i = 0; i < WIDTH + 8; i++) cout << "-";
-      cout << endl;
+      for (int i = 0; i < WIDTH + 8; i++) std::cout << "-";
+      std::cout << std::endl;
     }
 
-    cout << left << setw(WIDTH) << it->name << "| " << it->value << endl;
+    std::cout << std::left << std::setw(WIDTH) << it->name << "| " << it->value << std::endl;
     prev_tag = it->tag;
   }
 }

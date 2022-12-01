@@ -23,14 +23,13 @@
 #define STATS_H
 
 #include <vector>
-using namespace std;
 
 class Stats
 {
 
 public:
   // adds a stat to the list of stats
-  void add(string tag, string name, int value);
+  void add(std::string tag, std::string name, int value);
 
   // print the stats
   void print();
@@ -38,12 +37,12 @@ public:
 private:
 
   struct Stat {
-    string tag;
-    string name;
+    std::string tag;
+    std::string name;
     int value;
   };
 
-  vector <Stat> statList;
+  std::vector <Stat> statList;
 };
 
 #endif // STATS_H

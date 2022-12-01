@@ -33,7 +33,6 @@
 #include "Scanner.h"
 #include "Stats.h"
 #include "Util.h"
-using namespace std;
 
 //=============================================================
 // RD Parser
@@ -48,7 +47,7 @@ ParseTree::build(Scanner &_scanner)
   root = expr();
   
   if (scanner.get_type() != ERR) {
-    stringstream s;
+      std::stringstream s;
     s << "ERROR (parse error): expected end of regex but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -123,7 +122,7 @@ ParseTree::concat()
   if (scanner.is_concat()) {
     ParseNode *right = concat();
     int left_loc = left->loc.second;
-    Location loc = make_pair(left_loc, left_loc + 1);
+    Location loc = std::make_pair(left_loc, left_loc + 1);
     ParseNode *concat_node = new ParseNode(CONCAT_NODE, loc, left, right);
     return concat_node;
   } else {
@@ -217,11 +216,11 @@ ParseTree::group()
 {
   bool ignored_group = false;
   bool normal_group = true;
-  string name = "";
+    std::string name = "";
   int start_loc = scanner.get_loc().second;
 
   if (scanner.get_type() != LEFT_PAREN) {
-    stringstream s;
+      std::stringstream s;
     s << "ERROR (parse error): expected '(' but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -264,24 +263,24 @@ ParseTree::group()
   // Create the group node
   ParseNode *group_node;
   int end_loc = scanner.get_loc().first;
-  Location loc = make_pair(start_loc, end_loc);
+  Location loc = std::make_pair(start_loc, end_loc);
   if (ignored_group) {
     group_node = new ParseNode(IGNORED_NODE, loc, NULL, NULL);
   }
   else {
-    group_node = new ParseNode(GROUP_NODE, loc, name, left, NULL);
+    group_node = new ParseNode(GROUP_NODE, loc, name, left, nullptr);
   }
 
   // Store group information
   if (normal_group) {
     group_locs[group_num] = loc;
-    if (name != "") {
+    if (!name.empty()) {
       named_group_locs[name] = loc;
     }
   }
 
   if (scanner.get_type() != RIGHT_PAREN) {
-    stringstream s;
+      std::stringstream s;
     s << "ERROR (parse error): expected ')' but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -330,13 +329,13 @@ ParseTree::character()
   }
   else if (type == WORD_BOUNDARY) {
     scanner.advance();
-    return new ParseNode(IGNORED_NODE, loc, NULL, NULL);
+    return new ParseNode(IGNORED_NODE, loc, nullptr, nullptr);
   }
   else if (type == BACKREFERENCE) {
     int group_num = scanner.get_group_num();
-    string group_name = scanner.get_group_name();
+      std::string group_name = scanner.get_group_name();
     Location group_loc;
-    if (group_name != "") {
+    if (!group_name.empty()) {
       group_loc = named_group_locs[group_name];
     }
     else {
@@ -348,7 +347,7 @@ ParseTree::character()
     scanner.advance();
   }
   else {
-    stringstream s;
+      std::stringstream s;
     s << "ERROR (parse error): expected character type but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -387,7 +386,7 @@ ParseTree::char_set()
   int start_loc = scanner.get_loc().second;
 
   if (scanner.get_type() != LEFT_BRACKET) {
-    stringstream s;
+      std::stringstream s;
     s << "ERROR (parse error): expected '[' but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -404,12 +403,12 @@ ParseTree::char_set()
     char c = char_set_node->char_set->get_valid_character();
     delete char_set_node;
     int end_loc = scanner.get_loc().first;
-    Location loc = make_pair(start_loc, end_loc);
+    Location loc = std::make_pair(start_loc, end_loc);
     char_set_node = new ParseNode(CHARACTER_NODE, loc, c);
   }
 
   if (scanner.get_type() != RIGHT_BRACKET) {
-    stringstream s;
+      std::stringstream s;
     s << "ERROR (parse error): expected ']' but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -430,7 +429,7 @@ ParseTree::char_list(int start_loc)
   // Check for end of list
   if (scanner.get_type() == RIGHT_BRACKET) {
     int end_loc = scanner.get_loc().first;
-    Location loc = make_pair(start_loc, end_loc);
+    Location loc = std::make_pair(start_loc, end_loc);
     char_set_node = new ParseNode(CHAR_SET_NODE, loc, new CharSet());
   }
   else {
@@ -489,7 +488,7 @@ ParseTree::character_item()
     char_set_item.character = '-';
   }
   else {
-    stringstream s;
+      std::stringstream s;
     s << "ERROR (parse error): expected character type but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -524,7 +523,7 @@ ParseTree::char_range_item()
 
   //TODO:  These seem like sanity checks - maybe assertions instead?
   if (scanner.get_type() != CHARACTER) {
-    stringstream s;
+    std::stringstream s;
     s << "ERROR (parse error): expected character type but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -532,14 +531,14 @@ ParseTree::char_range_item()
   scanner.advance();
 
   if (scanner.get_type() != HYPHEN) {
-    stringstream s;
+    std::stringstream s;
     s << "ERROR (parse error): expected hyphen but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
   scanner.advance();
 
   if (scanner.get_type() != CHARACTER) {
-    stringstream s;
+    std::stringstream s;
     s << "ERROR (parse error): expected character type but received " << scanner.get_type_str();
     throw EgretException(s.str());
   }
@@ -554,9 +553,9 @@ ParseTree::char_range_item()
 void
 ParseTree::print()
 {
-  cout << "Tree:" << endl;
+  std::cout << "Tree:" << std::endl;
   print_tree(root, 0);
-  cout << endl;
+  std::cout << std::endl;
 }
 
 void
@@ -565,51 +564,51 @@ ParseTree::print_tree(ParseNode *node, unsigned offset)
   if (!node) return;
 
   for (unsigned int i = 0; i < offset; i++)
-    cout << " ";
+      std::cout << " ";
 
-  cout << "<";
+    std::cout << "<";
   switch (node->type) {
   case ALTERNATION_NODE:
-    cout << "alternation |";
+      std::cout << "alternation |";
     break;
   case CONCAT_NODE:
-    cout << "concat";
+      std::cout << "concat";
     break;
   case REPEAT_NODE:
     if (node->repeat_upper == -1)
-      cout << "repeat {" << node->repeat_lower << ",}";
-    else 
-      cout << "repeat {" << node->repeat_lower << "," << node->repeat_upper << "}";
+        std::cout << "repeat {" << node->repeat_lower << ",}";
+    else
+        std::cout << "repeat {" << node->repeat_lower << "," << node->repeat_upper << "}";
     break;
   case GROUP_NODE:
-    cout << "group"; 
+      std::cout << "group";
     break;
   case BACKREFERENCE_NODE:
-    cout << "backreference ";
+    std::cout << "backreference ";
     node->backref->print();
     break;
   case IGNORED_NODE:
-    cout << "ignored";
+    std::cout << "ignored";
     break;
   case CHARACTER_NODE:
-    cout << "character: " << node->character;
+    std::cout << "character: " << node->character;
     break;
   case CARET_NODE:
-    cout << "caret ^";
+    std::cout << "caret ^";
     break;
   case DOLLAR_NODE:
-    cout << "dollar $";
+    std::cout << "dollar $";
     break;
   case CHAR_SET_NODE:
-    cout << "charset [";
+    std::cout << "charset [";
     node->char_set->print();
-    cout << "]";
+    std::cout << "]";
     break;
   default:
     assert(false);
   }
 
-  cout << " @ (" << node->loc.first << "," << node->loc.second <<  ")>" << endl;
+    std::cout << " @ (" << node->loc.first << "," << node->loc.second <<  ")>" << std::endl;
 
   print_tree(node->left, offset + 2);
   print_tree(node->right, offset + 2);

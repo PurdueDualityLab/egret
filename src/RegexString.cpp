@@ -24,24 +24,23 @@
 #include <iostream>
 #include <algorithm>
 #include "RegexString.h"
-using namespace std;
 
 void
-RegexString::gen_min_iter_string(string &min_iter_string)
+RegexString::gen_min_iter_string(std::string &min_iter_string)
 {
   if (repeat_lower != 0) {
     min_iter_string.append(get_substring());
   }
 }
 
-vector <string>
-RegexString::gen_evil_strings(string test_string, const set <char> &punct_marks)
+std::vector <std::string>
+RegexString::gen_evil_strings(const std::string& test_string, const std::set <char> &punct_marks)
 {
-  vector <string> evil_substrings; // set of evil substrings
+  std::vector <std::string> evil_substrings; // set of evil substrings
 
   // create suffix: substring after the loop
   int start = prefix.size() + substring.size();
-  string suffix = test_string.substr(start);
+    std::string suffix = test_string.substr(start);
 
   // insert one letter strings
   evil_substrings.push_back("");
@@ -54,8 +53,8 @@ RegexString::gen_evil_strings(string test_string, const set <char> &punct_marks)
 
   // split test string into two halves
   unsigned int half = substring.size() / 2;
-  string before = substring.substr(0, half);
-  string after = substring.substr(half);
+  std::string before = substring.substr(0, half);
+  std::string after = substring.substr(half);
 
   // insert strings with added digit, space, and underscore
   evil_substrings.push_back(before + "4" + after);
@@ -64,17 +63,17 @@ RegexString::gen_evil_strings(string test_string, const set <char> &punct_marks)
 
   // insert all uppercase, all lowercase, and mixed case where
   // the first char is lowercase and the second char is uppercase
-  string all_upper = substring;
-  string all_lower = all_upper;
-  string mixed = all_upper;
+  std::string all_upper = substring;
+  std::string all_lower = all_upper;
+  std::string mixed = all_upper;
 
   for (unsigned int i = 0; i < substring.size(); i++) {
-    all_upper[i] = toupper(all_upper[i], locale());
-    all_lower[i] = tolower(all_lower[i], locale());
+    all_upper[i] = toupper(all_upper[i], std::locale());
+    all_lower[i] = tolower(all_lower[i], std::locale());
     if (i == 0) {
-      mixed[i] = tolower(mixed[i], locale());
+      mixed[i] = tolower(mixed[i], std::locale());
     } else if (i == 1) {
-      mixed[i] = toupper(mixed[i], locale());
+      mixed[i] = toupper(mixed[i], std::locale());
     }
   }
   evil_substrings.push_back(all_upper);
@@ -83,18 +82,17 @@ RegexString::gen_evil_strings(string test_string, const set <char> &punct_marks)
   
   // insert strings for each punctation mark
   if (char_set->allows_punctuation()) {
-    set <char>::iterator it;
-    for (it = punct_marks.begin(); it != punct_marks.end(); it++) {
+    for (char punct_mark : punct_marks) {
       // TODO: This string constructor the most logical?
-      evil_substrings.push_back(string(1, *it));
+      evil_substrings.emplace_back(1, punct_mark);
     }
   }
 
   // generate the new full strings
-  vector <string> evil_strings;
-  vector <string>::iterator tsi;
+  std::vector <std::string> evil_strings;
+  std::vector <std::string>::iterator tsi;
   for (tsi = evil_substrings.begin(); tsi != evil_substrings.end(); tsi++) {
-    string new_string = prefix + *tsi + suffix;
+      std::string new_string = prefix + *tsi + suffix;
     evil_strings.push_back(new_string);
   }
 
@@ -107,15 +105,15 @@ RegexString::print()
   char_set->print();
 
   if (repeat_lower == 0 && repeat_upper == -1)
-    cout << "*";
+    std::cout << "*";
   else if (repeat_lower == 1 && repeat_upper == -1)
-    cout << "+";
+    std::cout << "+";
   else if (repeat_lower == 0 && repeat_upper == 1)
-    cout << "?";
+    std::cout << "?";
   else if (repeat_upper == -1)
-    cout << "{" << repeat_lower << ",}";
+    std::cout << "{" << repeat_lower << ",}";
   else if (repeat_lower == repeat_upper)
-    cout << "{" << repeat_lower << "}";
+    std::cout << "{" << repeat_lower << "}";
   else
-    cout << "{" << repeat_lower << "," << repeat_upper << "}";
+    std::cout << "{" << repeat_lower << "," << repeat_upper << "}";
 }

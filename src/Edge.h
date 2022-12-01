@@ -29,7 +29,6 @@
 #include "RegexLoop.h"
 #include "RegexString.h"
 #include "Util.h"
-using namespace std;
 
 class Path;     // used to resolve a circular dependency
 
@@ -51,7 +50,7 @@ public:
 
   // constructors
   Edge() { processed = false; }
-  Edge(EdgeType t) { type = t; loc = make_pair(-1, -1); processed = false; }
+  Edge(EdgeType t) { type = t; loc = std::make_pair(-1, -1); processed = false; }
   Edge(EdgeType t, Location l) { type = t; loc = l; processed = false; }
   Edge(EdgeType t, Location l, char c) { type = t; loc = l; character = c; processed = false; }
   Edge(EdgeType t, Location l, CharSet *c) { type = t; loc = l; char_set = c; processed = false; }
@@ -69,10 +68,10 @@ public:
   }
 
   // process an edge, returns true if edge should be used in creating evil strings
-  bool process_edge(string test_string, Path *path);
+  bool process_edge(const std::string& test_string, Path *path);
 
   // get substring associated with edge
-  string get_substring();
+  std::string get_substring();
 
   // edge property functions - used by checker
   bool is_opt_repeat_begin();
@@ -91,13 +90,13 @@ public:
   bool is_digit_too_optional_candidate();
 
   // creates a regex due to a wild punctuation error
-  string fix_wild_punctuation(char c);
+  std::string fix_wild_punctuation(char c) const;
 
   // generate minimum iteration string
-  void gen_min_iter_string(string &min_iter_string);
+  void gen_min_iter_string(std::string &min_iter_string);
 
   // generate evil strings
-  vector <string> gen_evil_strings(string path_string, const set <char> &punct_marks);
+  std::vector <std::string> gen_evil_strings(const std::string& path_string, const std::set <char> &punct_marks);
 
   // print the edge
   void print();

@@ -29,7 +29,6 @@
 #include "CharSet.h"
 #include "Path.h"
 #include "Util.h"
-using namespace std;
 
 // CONSTRUCTION FUNCTIONS
 void
@@ -50,7 +49,7 @@ bool
 CharSet::is_wildcard()
 {
   if (items.size() != 1) return false;
-  vector<CharSetItem>::iterator item_ptr = items.begin();
+  auto item_ptr = items.begin();
   return (item_ptr->type == CHAR_CLASS_ITEM && item_ptr->character == '.');
 }
 
@@ -68,17 +67,25 @@ CharSet::is_string_candidate()
 
   bool candidate = false;
 
-  vector <CharSetItem>::iterator it;
+  std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     switch (it->type) {
       case CHARACTER_ITEM:
         break; 	// Ignore
       case CHAR_CLASS_ITEM:
         switch (it->character) {
+#if 0
           case 'w':	candidate = true; break;
           case 'D':	candidate = true; break;
           case 'S':	candidate = true; break;
           case '.':	candidate = true; break;
+#endif
+        case 'w':
+        case 'D':
+        case 'S':
+        case '.':
+            candidate = true;
+            break;
           default:	;
 	}
         break;
@@ -106,7 +113,7 @@ CharSet::allows_punctuation()
 {
   if (complement) return true;
 
-  vector <CharSetItem>::iterator it;
+  std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     switch (it->type) {
       case CHARACTER_ITEM:
@@ -139,7 +146,7 @@ CharSet::only_has_punc_and_spaces()
 bool
 CharSet::only_has_punc(bool allow_spaces)
 {
-  vector <CharSetItem>::iterator it;
+  std::vector <CharSetItem>::iterator it;
   if (complement) return false;
 
   bool found_punc = false;
@@ -193,14 +200,13 @@ CharSet::only_has_punc(bool allow_spaces)
 bool
 CharSet::is_valid_character(char character)
 {
-  vector <CharSetItem>::iterator it;
-  for (it = items.begin(); it != items.end(); it++) {
-    switch (it->type) {
+  for (auto & item : items) {
+    switch (item.type) {
       case CHARACTER_ITEM:
-	if (character == it->character) return !complement;
+	if (character == item.character) return !complement;
 	break;
       case CHAR_CLASS_ITEM:
-        switch (it->character) {
+        switch (item.character) {
           case 'w':
 	    if (character >= 'a' && character <= 'z') return !complement; 
 	    if (character >= 'A' && character <= 'Z') return !complement; 
@@ -233,16 +239,16 @@ CharSet::is_valid_character(char character)
             return !complement;
 	  default:
 	  {
-	    stringstream s;
+	    std::stringstream s;
 	    s << "ERROR (internal): Invalid character class in character set: "
-	      << it->character;
+	      << item.character;
 	    throw EgretException(s.str());
 	  }
   	}
         break;
 
       case CHAR_RANGE_ITEM:
-        if (character >= it->range_start && character <= it->range_end) return !complement;
+        if (character >= item.range_start && character <= item.range_end) return !complement;
         break;
     }
   }
@@ -254,7 +260,7 @@ CharSet::has_character_item(char character)
 {
   if (complement) return false;
 
-  vector <CharSetItem>::iterator it;
+  std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     if (it->type == CHARACTER_ITEM && character == it->character)
       return true;
@@ -263,12 +269,12 @@ CharSet::has_character_item(char character)
   return false;
 }
 
-string
+std::string
 CharSet::get_charset_as_string()
 {
-  vector <CharSetItem>::iterator it;
-  string ret = "";
-  vector <CharSetItem> sorted_items = items;
+  std::vector <CharSetItem>::iterator it;
+  std::string ret{};
+  std::vector <CharSetItem> sorted_items = items;
 
   struct sortClass {
     bool operator() (CharSetItem x, CharSetItem y) {
@@ -288,7 +294,7 @@ CharSet::get_charset_as_string()
 char
 CharSet::get_valid_character(char except)
 {
-  vector <CharSetItem>::iterator it;
+    std::vector <CharSetItem>::iterator it;
   const char PUNC_ARRAY[32] = { '!', '\"', '#', '$', '%', '&', '\'', '*', '+', '/',
         ':', ';', '<', '=', '>', '?', '@', '\\', '^', '_', '`', '~', '-', '.',
         '{', '[', '(', '}', ']', ')', ',', '|'};
@@ -308,8 +314,7 @@ CharSet::get_valid_character(char except)
       if (except == c) continue;
       if (is_valid_character(c)) return c;
     }
-    for (unsigned int i = 0; i < 32; i++) {
-      char c = PUNC_ARRAY[i];
+    for (char c : PUNC_ARRAY) {
       if (except == c) continue;
       if (is_valid_character(c)) return c;
     }
@@ -344,18 +349,17 @@ CharSet::get_valid_character(char except)
             case '.':	return (except != 'a') ? 'a' : 'b';
 	    default:
 	    {
-	      stringstream s;
+            std::stringstream s;
 	      s << "ERROR (internal): Invalid character class in character set: "
 	           << it->character;
 	      throw EgretException(s.str());
   	    }
 	  }
-          break;
+
         case CHAR_RANGE_ITEM:
         {
           char c = it->range_start;
   	  return (except != c) ? c : c + 1;
-	  break;
         }
       }
     }
@@ -409,8 +413,8 @@ CharSet::check(Path *path, Location loc)
   if (checked) return;
   checked = true;
 
-  set <char> ind_chars;
-  set <char> duplicates;
+  std::set <char> ind_chars;
+  std::set <char> duplicates;
   bool bar_found = false;
   bool not_bar_punc_found = false;
   bool bar_violation = false;
@@ -423,13 +427,13 @@ CharSet::check(Path *path, Location loc)
 
   // Check for three item character sets
   if (items.size() == 3 && !complement) {
-    vector <CharSetItem>::iterator first, second, third;
+    std::vector <CharSetItem>::iterator first, second, third;
     first = items.begin();
     second = first + 1;
     third = second + 1;
     if (second->type == CHARACTER_ITEM) {
       if (second->character == '|') {
-        string suggest = fix_comma_bar_charset(loc, '|'); 
+        std::string suggest = fix_comma_bar_charset(loc, '|');
         Alert a("charset sep", "Likely use of | in character set for alternation", suggest, loc);
         a.has_example = true;
         a.example = path->gen_example_string(loc, '|');
@@ -437,7 +441,7 @@ CharSet::check(Path *path, Location loc)
         bar_violation = true;
       }
       if (second->character == ',') {
-        string suggest = fix_comma_bar_charset(loc, ','); 
+        std::string suggest = fix_comma_bar_charset(loc, ',');
         Alert a("charset sep", "Likely use of , in character set to separate cases", suggest, loc);
         a.has_example = true;
         a.example = path->gen_example_string(loc, ',');
@@ -448,7 +452,7 @@ CharSet::check(Path *path, Location loc)
   }
     
   // Process individual characters first
-  vector <CharSetItem>::iterator it;
+    std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     if (it->type == CHARACTER_ITEM) {
       char c = it->character;
@@ -497,7 +501,7 @@ CharSet::check(Path *path, Location loc)
       }
 
       if (!good_range) {
-        stringstream s;
+          std::stringstream s;
         s << "The fragment " << start << "-" << end << " is interpreted as a range";
         Alert a("bad range", s.str(), fix_bad_range(loc), loc);
         Util::get()->add_alert(a);
@@ -521,7 +525,7 @@ CharSet::check(Path *path, Location loc)
   bool dup_other = false;
   if (!duplicates.empty()) {
 
-    set <char>::iterator si;
+      std::set <char>::iterator si;
     for (si = duplicates.begin(); si != duplicates.end(); si++) {
       switch (*si) {
         case '|':
@@ -546,7 +550,7 @@ CharSet::check(Path *path, Location loc)
   // Report duplicate violations
   if (dup_bar || (bar_found && !not_bar_punc_found && !complement)) {
     if (!bar_violation) {
-      string suggest;
+        std::string suggest;
       if (has_range(loc)) {
         suggest = fix_comma_bar_charset(loc, '|'); 
       }
@@ -561,7 +565,7 @@ CharSet::check(Path *path, Location loc)
   }
   else if (dup_comma || (comma_found && !not_comma_punc_found && !complement)) {
     if (!comma_violation) {
-      string suggest = fix_comma_bar_charset(loc, ','); 
+        std::string suggest = fix_comma_bar_charset(loc, ',');
       Alert a("charset sep", "Likely use of , in character set to separate cases", suggest, loc);
       a.has_example = true;
       a.example = path->gen_example_string(loc, ',');
@@ -569,9 +573,9 @@ CharSet::check(Path *path, Location loc)
     }
   }
   else if (dup_other || dup_bar || dup_comma) {
-    stringstream s;
+      std::stringstream s;
     s << "Duplicate characters in character set:";
-    set <char>::iterator si;
+    std::set <char>::iterator si;
     for (si = duplicates.begin(); si != duplicates.end(); si++) {
       s << " " << *si;
     }
@@ -642,7 +646,7 @@ bool
 CharSet::is_digit_too_optional_candidate()
 {
   if (items.size() != 1) return false;
-  vector <CharSetItem>::iterator vi = items.begin();
+    std::vector <CharSetItem>::iterator vi = items.begin();
 
   if (vi->type == CHAR_CLASS_ITEM && vi->character == 'd') return true;
   if (vi->type == CHAR_RANGE_ITEM && vi->range_start == '0' && vi->range_end == '9') return true;
@@ -665,7 +669,7 @@ CharSet::is_good_range(char start, char end)
 bool
 CharSet::has_upper_range()
 {
-  vector <CharSetItem>::iterator it;
+    std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     switch (it->type) {
       case CHARACTER_ITEM:
@@ -690,7 +694,7 @@ CharSet::has_upper_range()
 bool
 CharSet::has_lower_range()
 {
-  vector <CharSetItem>::iterator it;
+    std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     switch (it->type) {
       case CHARACTER_ITEM:
@@ -715,7 +719,7 @@ CharSet::has_lower_range()
 bool
 CharSet::has_digit_range()
 {
-  vector <CharSetItem>::iterator it;
+    std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     switch (it->type) {
       case CHARACTER_ITEM:
@@ -738,11 +742,11 @@ CharSet::has_digit_range()
   return false;
 }
 
-string
+std::string
 CharSet::fix_bad_range(Location loc)
 {
-  string new_charset = "[";
-  string regex = Util::get()->get_regex();
+  std::string new_charset = "[";
+  std::string regex = Util::get()->get_regex();
   int begin = loc.first + 1;
 
   bool has_upper = has_upper_range();
@@ -867,30 +871,30 @@ CharSet::fix_bad_range(Location loc)
 bool
 CharSet::has_range(Location loc)
 {
-  vector <CharSetItem>::iterator it;
+  std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     if (it->type == CHAR_RANGE_ITEM) return true;
   }
 
-  string regex = Util::get()->get_regex();
-  string charset = regex.substr(loc.first, loc.second - loc.first + 1);
-  if (regex.find("0|9") != string::npos) return true;
-  if (regex.find("0,9") != string::npos) return true;
-  if (regex.find("A|Z") != string::npos) return true;
-  if (regex.find("A,Z") != string::npos) return true;
-  if (regex.find("a|z") != string::npos) return true;
-  if (regex.find("a,z") != string::npos) return true;
+  std::string regex = Util::get()->get_regex();
+  std::string charset = regex.substr(loc.first, loc.second - loc.first + 1);
+  if (regex.find("0|9") != std::string::npos) return true;
+  if (regex.find("0,9") != std::string::npos) return true;
+  if (regex.find("A|Z") != std::string::npos) return true;
+  if (regex.find("A,Z") != std::string::npos) return true;
+  if (regex.find("a|z") != std::string::npos) return true;
+  if (regex.find("a,z") != std::string::npos) return true;
 
   return false;
 }
 
-string 
+std::string
 CharSet::fix_comma_bar_charset(Location loc, char elim)
 {
-  string regex = Util::get()->get_regex();
-  string new_regex;
+    std::string regex = Util::get()->get_regex();
+    std::string new_regex;
 
-  string charset = regex.substr(loc.first, loc.second - loc.first + 1);
+    std::string charset = regex.substr(loc.first, loc.second - loc.first + 1);
   replace(charset, "0|9", "0-9");
   replace(charset, "0,9", "0-9");
   replace(charset, "A|Z", "A-Z");
@@ -898,14 +902,14 @@ CharSet::fix_comma_bar_charset(Location loc, char elim)
   replace(charset, "a|z", "a-z");
   replace(charset, "a,z", "a-z");
 
-  for (unsigned int i = 0; i < charset.size(); i++) {
-    if (charset[i] != elim) {
-      new_regex += charset[i];
+  for (char i : charset) {
+    if (i != elim) {
+      new_regex += i;
     }
   }
 
   // TODO: Can this code which eliminates bad ranges from the result use a modified fix_bad_range function?
-  string new_charset = "[";
+    std::string new_charset = "[";
   regex = new_regex;
   int begin = 1;
 
@@ -942,18 +946,18 @@ CharSet::fix_comma_bar_charset(Location loc, char elim)
 }
  
 void
-CharSet::replace(string &str, string from, string to)
+CharSet::replace(std::string &str, std::string from, std::string to)
 {
   size_t start_pos = str.find(from);
-  if (start_pos == string::npos) return;
+  if (start_pos == std::string::npos) return;
   str.replace(start_pos, from.size(), to);
 }
 
-string
+std::string
 CharSet::replace_charset_with_parens(Location loc)
 {
-  string regex = Util::get()->get_regex();
-  string charset = regex.substr(loc.first, loc.second - loc.first + 1);
+  std::string regex = Util::get()->get_regex();
+  std::string charset = regex.substr(loc.first, loc.second - loc.first + 1);
   charset[0] = '(';
   charset[charset.size() - 1] = ')';
   return charset;
@@ -961,16 +965,16 @@ CharSet::replace_charset_with_parens(Location loc)
 
 // TEST GENERATION FUNCTIONS
 
-vector <string>
-CharSet::gen_evil_strings(string test_string, const set <char> &punct_marks)
+std::vector <std::string>
+CharSet::gen_evil_strings(std::string test_string, const std::set <char> &punct_marks)
 {
-  set <char> test_chars  = create_test_chars(punct_marks);
-  string suffix = test_string.substr(prefix.size() + 1);
-  vector <string> evil_strings;
+  std::set <char> test_chars  = create_test_chars(punct_marks);
+  std::string suffix = test_string.substr(prefix.size() + 1);
+  std::vector <std::string> evil_strings;
 
-  set <char>::iterator cs;
+  std::set <char>::iterator cs;
   for (cs = test_chars.begin(); cs != test_chars.end(); cs++) {
-    string new_string = prefix;
+    std::string new_string = prefix;
     new_string += *cs;
     new_string += suffix;
     evil_strings.push_back(new_string);
@@ -978,10 +982,10 @@ CharSet::gen_evil_strings(string test_string, const set <char> &punct_marks)
   return evil_strings;
 }
 
-set <char>
-CharSet::create_test_chars(const set<char> &punct_marks)
+std::set <char>
+CharSet::create_test_chars(const std::set<char> &punct_marks)
 {
-  set <char> test_chars;
+  std::set <char> test_chars;
   bool lowercase_flag = false;
   bool uppercase_flag = false;
   bool digit_flag = false;
@@ -996,12 +1000,12 @@ CharSet::create_test_chars(const set<char> &punct_marks)
     lowercase[i] = false;
     uppercase[i] = false;
   }
-  for (int i = 0; i < 10; i++) {
-    digits[i] = false;
+  for (bool & digit : digits) {
+    digit = false;
   }
 
   // Process individual characters first
-  vector <CharSetItem>::iterator it;
+  std::vector <CharSetItem>::iterator it;
   for (it = items.begin(); it != items.end(); it++) {
     if (it->type == CHARACTER_ITEM) {
       char c = it->character;
@@ -1034,7 +1038,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
 	lowercase_flag = true;
 	bool found_letter = false;
 	for (char c = start; c <= end; c++) {
-	  if (found_letter == false && lowercase[c - 'a'] == false) {
+	  if (!found_letter && !lowercase[c - 'a']) {
 	    test_chars.insert(c);
 	    found_letter = true;
 	  }
@@ -1047,7 +1051,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
 	uppercase_flag = true;
 	bool found_letter = false;
 	for (char c = start; c <= end; c++) {
-	  if (found_letter == false && uppercase[c - 'A'] == false) {
+	  if (!found_letter && !uppercase[c - 'A']) {
 	    test_chars.insert(c);
 	    found_letter = true;
 	  }
@@ -1060,7 +1064,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
 	digit_flag = true;
 	bool found_letter = false;
 	for (char c = start; c <= end; c++) {
-	  if (found_letter == false && digits[c - '0'] == false) {
+	  if (!found_letter && !digits[c - '0']) {
 	    test_chars.insert(c);
 	    found_letter = true;
 	  }
@@ -1068,7 +1072,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
 	}
       }
       else {
-	stringstream s;
+          std::stringstream s;
         // TODO: Fix this for "bad" ranges that no longer abort earlier
         s << "ERROR (bad range): Invalid range: " << start << "-" << end;
         throw EgretException(s.str());
@@ -1121,7 +1125,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
 
 	default:
 	{
-	  stringstream s;
+        std::stringstream s;
 	  s << "ERROR (internal): Invalid character class in character set: "
 	    << it->character;
 	  throw EgretException(s.str());
@@ -1142,7 +1146,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
   // If lowercase is flagged, then add one more lower case letter.
   if (lowercase_flag) {
     for (char c = 'a'; c <= 'z'; c++)  {
-      if (lowercase[c - 'a'] == false)  {
+      if (!lowercase[c - 'a'])  {
 	test_chars.insert(c);
 	break;
       }
@@ -1152,7 +1156,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
   // If uppercase is flagged, then add one more upper case letter.
   if (uppercase_flag) {
     for (char c = 'A'; c <= 'Z'; c++)  {
-      if (uppercase[c - 'A'] == false)  {
+      if (!uppercase[c - 'A'])  {
 	test_chars.insert(c);
 	break;
       }
@@ -1162,7 +1166,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
   // If digit is flagged, then add one more digit.
   if (digit_flag) {
     for (char c = '0'; c <= '9'; c++)  {
-      if (digits[c - '0'] == false)  {
+      if (!digits[c - '0'])  {
 	test_chars.insert(c);
 	break;
       }
@@ -1172,7 +1176,7 @@ CharSet::create_test_chars(const set<char> &punct_marks)
   // If punctuation is flagged, then add all punctuation marks that appear
   // in the regular expression.
   if (punct_flag) {
-    set<char>::iterator si;
+    std::set<char>::iterator si;
     for (si = punct_marks.begin(); si != punct_marks.end(); si++) {
       test_chars.insert(*si);
     }
@@ -1191,19 +1195,19 @@ CharSet::create_test_chars(const set<char> &punct_marks)
 void
 CharSet::print()
 {
-  if (complement) cout << "^";
+  if (complement) std::cout << "^";
 
-  vector <CharSetItem>::reverse_iterator it;
+  std::vector <CharSetItem>::reverse_iterator it;
   for (it = items.rbegin(); it != items.rend(); it++) {
     switch (it->type) {
     case CHARACTER_ITEM:
-      cout << it->character;
+      std::cout << it->character;
       break;
     case CHAR_CLASS_ITEM:
-      cout << "\\" << it->character;
+      std::cout << "\\" << it->character;
       break;
     case CHAR_RANGE_ITEM:
-      cout << it->range_start << "-" << it->range_end;
+      std::cout << it->range_start << "-" << it->range_end;
       break;
     }
   }

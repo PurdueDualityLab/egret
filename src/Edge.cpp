@@ -27,10 +27,9 @@
 #include "Edge.h"
 #include "Scanner.h"
 #include "Path.h"
-using namespace std;
 
 bool
-Edge::process_edge(string test_string, Path *path)
+Edge::process_edge(const std::string& test_string, Path *path)
 {
   if (type == BEGIN_LOOP_EDGE) {
     regex_loop->set_curr_prefix(test_string);
@@ -72,10 +71,10 @@ Edge::process_edge(string test_string, Path *path)
   }
 }
 
-string
+std::string
 Edge::get_substring()
 {
-  string s;
+  std::string s;
   
   switch (type) {
     case CHARACTER_EDGE:
@@ -199,13 +198,13 @@ Edge::is_digit_too_optional_candidate()
   return (type == CHAR_SET_EDGE && char_set->is_digit_too_optional_candidate());
 }
 
-string
-Edge::fix_wild_punctuation(char c)
+std::string
+Edge::fix_wild_punctuation(char c) const
 {
-  string regex = Util::get()->get_regex();
-  string curr_regex = regex.substr(loc.first, loc.second - loc.first + 1);
+    std::string regex = Util::get()->get_regex();
+    std::string curr_regex = regex.substr(loc.first, loc.second - loc.first + 1);
 
-  string char_str = string(1, c);
+    std::string char_str = std::string(1, c);
   switch (c) {
     case '\\':
     case '[':
@@ -215,14 +214,14 @@ Edge::fix_wild_punctuation(char c)
       char_str = "\\" + char_str;
   } 
 
-  string fixed_char_set;
+  std::string fixed_char_set;
   if (curr_regex[0] == '.') {
     fixed_char_set = "[^" + char_str + "]";
   }
   else {
     assert(curr_regex[0] == '[');
     size_t pos = curr_regex.find_last_of(']');
-    assert(pos != string::npos);
+    assert(pos != std::string::npos);
     fixed_char_set = curr_regex.substr(0, pos + 1);
     fixed_char_set.insert(pos, char_str);
   }
@@ -231,7 +230,7 @@ Edge::fix_wild_punctuation(char c)
 }
 
 void
-Edge::gen_min_iter_string(string &min_iter_string)
+Edge::gen_min_iter_string(std::string &min_iter_string)
 {
   switch (type) {
     case STRING_EDGE:
@@ -249,8 +248,8 @@ Edge::gen_min_iter_string(string &min_iter_string)
   }
 }
 
-vector <string>
-Edge::gen_evil_strings(string path_string, const set <char> &punct_marks)
+std::vector <std::string>
+Edge::gen_evil_strings(const std::string& path_string, const std::set <char> &punct_marks)
 {
   switch (type) {
     case CHAR_SET_EDGE:
@@ -263,8 +262,7 @@ Edge::gen_evil_strings(string path_string, const set <char> &punct_marks)
       return backref->gen_evil_strings(path_string);
     default:
     {
-      vector <string> empty;
-      return empty;
+      return {};
     }
   }
 }
@@ -274,37 +272,37 @@ Edge::print()
 {
   switch (type) {
     case CHARACTER_EDGE:
-      cout << "CHARACTER " << character;
+      std::cout << "CHARACTER " << character;
       break;
     case CHAR_SET_EDGE:
-      cout << "CHAR_SET ";
+      std::cout << "CHAR_SET ";
       char_set->print();
       break;
     case STRING_EDGE:
-      cout << "STRING ";
+      std::cout << "STRING ";
       regex_str->print();
       break;
     case BEGIN_LOOP_EDGE:
-      cout << "BEGIN_LOOP ";
+      std::cout << "BEGIN_LOOP ";
       regex_loop->print();
       break;
     case END_LOOP_EDGE:
-      cout << "END_LOOP ";
+      std::cout << "END_LOOP ";
       regex_loop->print();
       break;
     case CARET_EDGE:
-      cout << "CARET";
+      std::cout << "CARET";
       break;
     case DOLLAR_EDGE:
-      cout << "DOLLAR";
+      std::cout << "DOLLAR";
       break;
     case BACKREFERENCE_EDGE:
-      cout << "BACKREFERENCE ";
+      std::cout << "BACKREFERENCE ";
       backref->print();
       break;
     case EPSILON_EDGE:
-      cout << "EPSILON";
+      std::cout << "EPSILON";
       break;
   } 
-  cout << " @ (" << loc.first << "," << loc.second << ")" << endl;
+  std::cout << " @ (" << loc.first << "," << loc.second << ")" << std::endl;
 }

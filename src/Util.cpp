@@ -22,20 +22,19 @@
 #include <string>
 #include <sstream>
 #include "Util.h"
-using namespace std;
 
 // global static pointer for singleton class
-Util* Util::inst = NULL;
+Util* Util::inst = nullptr;
 
 Util *
 Util::get() 
 {
-  if (inst == NULL) inst = new Util;
+  if (inst == nullptr) inst = new Util;
   return inst;
 }
 
 void
-Util::init(string r, bool c, bool w, string s)
+Util::init(std::string r, bool c, bool w, std::string s)
 {
   regex = r;
   check_mode = c;
@@ -49,12 +48,12 @@ void
 Util::add_alert(Alert alert)
 {
   // Create type, location pair
-  pair <string, int> alert_pair = make_pair(alert.type, alert.loc1.first);
+  std::pair <std::string, int> alert_pair = make_pair(alert.type, alert.loc1.first);
 
   // Line break
-  string lb = web_mode ? "<br>" : "\n";
-  string start = web_mode ? "<mark>" : "\033[33;44;1m";
-  string end = web_mode ? "</mark>" : "\033[0m";
+  std::string lb = web_mode ? "<br>" : "\n";
+  std::string start = web_mode ? "<mark>" : "\033[33;44;1m";
+  std::string end = web_mode ? "</mark>" : "\033[0m";
 
   if (prev_alerts.find(alert_pair) == prev_alerts.end()) {
     // New error - add to list of previous alerts
@@ -69,7 +68,7 @@ Util::add_alert(Alert alert)
   if (alert.warning && check_mode) return;
 
   // Produce alert message
-  stringstream s;
+    std::stringstream s;
   if (alert.warning)
     s << "WARNING (";
   else

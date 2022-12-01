@@ -24,9 +24,9 @@
 
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 #include "Util.h"
-using namespace std;
 
 class Path;             // breaks a circular dependency CharSet --> Path --> Edge --> CharSet
 
@@ -52,11 +52,11 @@ public:
   CharSet() { complement = false; checked = false; }
 
   // setters
-  void set_prefix(string p) { prefix = p; }
+  void set_prefix(std::string p) { prefix = std::move(p); }
   void set_complement(bool c) { complement = c; }
 
   // getters
-  bool is_complement() { return complement; }
+  bool is_complement() const { return complement; }
 
   // CONSTRUCTION FUNCTIONS
 
@@ -87,7 +87,7 @@ public:
   bool has_character_item(char character);
 
   // returns the character set as a sorted string
-  string get_charset_as_string();
+  std::string get_charset_as_string();
 
   // gets a single valid character
   char get_valid_character(char except = '\0');
@@ -107,7 +107,7 @@ public:
   // TEST GENERATION FUNCTIONS
 
   // generate evil strings
-  vector <string> gen_evil_strings(string test_string, const set <char> &punct_marks);
+  std::vector <std::string> gen_evil_strings(std::string test_string, const std::set <char> &punct_marks);
 
   // PRINT FUNCTION
 
@@ -116,9 +116,9 @@ public:
 
 private:
 
-  vector <CharSetItem> items;	// set of items comprising the set
+  std::vector <CharSetItem> items;	// set of items comprising the set
   bool complement;		// true if set is complemented
-  string prefix;		// path string up to visiting this node
+  std::string prefix;		// path string up to visiting this node
   bool checked;			// true of charset has been checked
 
   // checker functions
@@ -127,14 +127,14 @@ private:
   bool has_upper_range();
   bool has_lower_range();
   bool has_digit_range();
-  string fix_bad_range(Location loc);
+  std::string fix_bad_range(Location loc);
   bool has_range(Location loc);
-  string fix_comma_bar_charset(Location loc, char elim);
-  void replace(string &str, string from, string to);
-  string replace_charset_with_parens(Location loc);
+  std::string fix_comma_bar_charset(Location loc, char elim);
+  void replace(std::string &str, std::string from, std::string to);
+  std::string replace_charset_with_parens(Location loc);
   
   // creates a set of test characters
-  set <char> create_test_chars(const set <char> &punct_marks);
+  std::set <char> create_test_chars(const std::set <char> &punct_marks);
 };
 
 #endif // CHARSET_H

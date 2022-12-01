@@ -24,18 +24,18 @@
 
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 #include "Scanner.h"
 #include "Path.h"
-using namespace std;
 
 class Checker {
 
 public:
 
-  Checker(vector <Path> p, vector <Token> t) {
-    paths = p;
-    tokens = t;
+  Checker(std::vector <Path> p, std::vector <Token> t) {
+    paths = std::move(p);
+    tokens = std::move(t);
   }
 
   // checker entry point
@@ -43,8 +43,8 @@ public:
 
 private:
 
-  vector <Path> paths;		// list of paths
-  vector <Token> tokens;        // set of tokens - used for generated fixes
+  std::vector <Path> paths;		// list of paths
+  std::vector <Token> tokens;        // set of tokens - used for generated fixes
 
   // CHECKER FUNCTIONS
 
@@ -70,7 +70,7 @@ private:
    void check_digit_too_optional();
 
   // fix anchors
-  string fix_anchors();
+  std::string fix_anchors();
 };
 
 #endif // CHECKER_H

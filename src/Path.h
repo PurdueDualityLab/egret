@@ -26,15 +26,14 @@
 #include <string>
 #include <vector>
 #include "Edge.h"
-using namespace std;
 
 class Path {
 
 public:
 
-  Path() {}
+  Path() = default;
   Path(unsigned int initial) { states.push_back(initial); }
-  string get_test_string() { return test_string; }
+  std::string get_test_string() { return test_string; }
 
   // PATH CONSTRUCTION FUNCTIONS
 
@@ -80,20 +79,20 @@ public:
   // STRING GENERATION FUNCTIONS
 
   // generates example string 
-  string gen_example_string(Location loc, char c);
-  string gen_example_string(Location loc, char c, char except);
-  string gen_example_string(Location loc, char c, Location omit);
-  string gen_example_string(Location loc1, char c1, Location loc2, char c2);
-  string gen_example_string(Location loc, string replace);
+  std::string gen_example_string(Location loc, char c);
+  std::string gen_example_string(Location loc, char c, char except);
+  std::string gen_example_string(Location loc, char c, Location omit);
+  std::string gen_example_string(Location loc1, char c1, Location loc2, char c2);
+  std::string gen_example_string(Location loc, const std::string& replace);
 
   // generates string based on location
-  string gen_backref_string(Location loc);
+  std::string gen_backref_string(Location loc);
 
   // generates a string with minimum iterations for repeating constructs
-  string gen_min_iter_string();
+  std::string gen_min_iter_string();
 
   // generates evil strings for the path
-  vector <string> gen_evil_strings(const set <char> &punct_marks);
+  std::vector <std::string> gen_evil_strings(const std::set <char> &punct_marks);
 
   // PRINT FUNCTION
   
@@ -101,11 +100,10 @@ public:
   void print();
 
 private:
-
-  vector <unsigned int> states;		// list of states
-  vector <Edge *> edges;		// list of edges
-  string test_string;		// test string associated with path
-  vector <unsigned int> evil_edges;	// list of evil edges that need processing
+  std::vector <unsigned int> states;		// list of states
+  std::vector <Edge *> edges;		// list of edges
+  std::string test_string;		// test string associated with path
+  std::vector <unsigned int> evil_edges;	// list of evil edges that need processing
 
 };
 

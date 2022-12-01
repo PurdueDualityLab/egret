@@ -27,7 +27,6 @@
 #include <vector>
 #include "CharSet.h"
 #include "Util.h"
-using namespace std;
 
 class RegexString {
 
@@ -40,11 +39,11 @@ public:
   }
 
   // setters
-  void set_prefix(string p) { prefix = p; }
-  void set_substring(string s) { substring = s; }
+  void set_prefix(std::string p) { prefix = p; }
+  void set_substring(std::string s) { substring = s; }
 
   // getters
-  string get_substring() { return substring; }
+  std::string get_substring() { return substring; }
   int get_repeat_lower() { return repeat_lower; }
   int get_repeat_upper() { return repeat_upper; }
   CharSet *get_charset() { return char_set; }
@@ -59,10 +58,10 @@ public:
   char get_repeat_punc_char() { return char_set->get_repeat_punc_char(); }
 
   // generate minimum iterations string
-  void gen_min_iter_string(string &min_iter_string);
+  void gen_min_iter_string(std::string &min_iter_string);
 
   // generate evil strings
-  vector <string> gen_evil_strings(string test_string, const set <char> &punct_marks);
+  std::vector <std::string> gen_evil_strings(const std::string& test_string, const std::set <char> &punct_marks);
 
   // print the regex string
   void print();
@@ -72,8 +71,8 @@ private:
   int repeat_lower;     	// lower bound for string
   int repeat_upper;     	// upper bound for string
 
-  string prefix;            // prefix of test string before the loop
-  string substring;         // substring corresponding to this string
+  std::string prefix;            // prefix of test string before the loop
+  std::string substring;         // substring corresponding to this string
 };
 
 #endif // REGEX_STRING_H

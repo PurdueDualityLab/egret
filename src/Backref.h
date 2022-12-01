@@ -23,50 +23,49 @@
 #define BACKREF_H
 
 #include <string>
+#include <utility>
 #include <vector>
 #include "Util.h"
-using namespace std;
 
 class Backref {
 
 public:
 
-  Backref(string name, int number, Location l) {
-    group_name = name;
+  Backref(std::string name, int number, Location l) {
+    group_name = std::move(name);
     group_number = number;
     group_loc = l;
   }
 
   // setters
-  void set_curr_prefix(string s) { curr_prefix = s; }
-  void set_curr_substring(string s) { curr_substring = s; }
+  void set_curr_prefix(std::string s) { curr_prefix = std::move(s); }
+  void set_curr_substring(std::string s) { curr_substring = std::move(s); }
   void set_prefix_from_curr() { prefix = curr_prefix; }
   void set_substring_from_curr() { substring = curr_substring; }
 
   // getters
   Location get_group_loc() { return group_loc; }
-  string get_substring() { return substring; }
+    std::string get_substring() { return substring; }
 
   // generate minimum iteration string
-  void gen_min_iter_string(string &min_iter_string);
+  void gen_min_iter_string(std::string &min_iter_string);
 
   // generate evil strings
-  vector <string> gen_evil_strings(string test_string);
+  std::vector <std::string> gen_evil_strings(std::string test_string);
 
   // print the regex loop
   void print();
 
 private:
+    std::string group_name;            // name of group (blank if using numbered backreference)
+    int group_number;             // number of group
+    Location group_loc;           // location of group
 
-  string group_name;            // name of group (blank if using numbered backreference)
-  int group_number;             // number of group
-  Location group_loc;           // location of group
+    std::string prefix;       	        // prefix of test string before the backreference
+    std::string substring;    	        // substring corresponding to backreference
 
-  string prefix;       	        // prefix of test string before the backreference
-  string substring;    	        // substring corresponding to backreference
-
-  string curr_prefix;           // current path string up to visiting this node
-  string curr_substring;        // current substring corresponding to this backreference
+    std::string curr_prefix;           // current path string up to visiting this node
+    std::string curr_substring;        // current substring corresponding to this backreference
 };
 
 #endif // BACKREF_H

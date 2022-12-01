@@ -28,7 +28,6 @@
 #include "Edge.h"
 #include "Path.h"
 #include "Util.h"
-using namespace std;
 
 // PATH CONSTRUCTION FUNCTIONS
 
@@ -49,7 +48,7 @@ Path::remove_last()
 void
 Path::mark_path_visited(bool *visited)
 {
-  vector <unsigned int>::iterator it;
+    using namespace std;vector <unsigned int>::iterator it;
   for (it = states.begin(); it != states.end(); it++) {
     visited[*it] = true;
   }
@@ -124,19 +123,19 @@ Path::check_anchor_in_middle()
   Location seen_non_caret_loc;
   Location seen_dollar_loc;
 
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    switch (edges[i]->get_type()) {
+  for (auto & edge : edges) {
+    switch (edge->get_type()) {
       case CARET_EDGE:
 	if (seen_non_caret) {
-          string msg = "Generated string has ^ anchor in the middle: " + test_string;
-          Alert a("anchor middle", msg, seen_non_caret_loc, edges[i]->get_loc());
+          std::string msg = "Generated string has ^ anchor in the middle: " + test_string;
+          Alert a("anchor middle", msg, seen_non_caret_loc, edge->get_loc());
           Util::get()->add_alert(a);
 	  return true;
 	}
 	break;
       case DOLLAR_EDGE:
 	seen_dollar = true;
-        seen_dollar_loc = edges[i]->get_loc();
+        seen_dollar_loc = edge->get_loc();
 	break;
       case BEGIN_LOOP_EDGE:
       case END_LOOP_EDGE:
@@ -145,9 +144,9 @@ Path::check_anchor_in_middle()
 	break;
       default:
 	seen_non_caret = true;
-        seen_non_caret_loc = edges[i]->get_loc();
+        seen_non_caret_loc = edge->get_loc();
 	if (seen_dollar) {
-          string msg = "Generated string has $ anchor in the middle: " + test_string;
+        std::string msg = "Generated string has $ anchor in the middle: " + test_string;
           Alert a("anchor middle", msg, seen_dollar_loc, seen_non_caret_loc);
           Util::get()->add_alert(a);
 	  return true;
@@ -161,21 +160,21 @@ Path::check_anchor_in_middle()
 void
 Path::check_charsets()
 {
-  vector <string> charsets; // keeps track of charsets, looking for duplicates
-  vector <Location> locs;  
+  std::vector <std::string> charsets; // keeps track of charsets, looking for duplicates
+  std::vector <Location> locs;
   
-  for (unsigned int i = 0; i < edges.size(); i++) {
+  for (auto & edge : edges) {
 
-    if (edges[i]->get_type() == CHAR_SET_EDGE || edges[i]->get_type() == STRING_EDGE) {
-      CharSet *charset_ptr = edges[i]->get_charset();
-      Location loc = edges[i]->get_loc();
+    if (edge->get_type() == CHAR_SET_EDGE || edge->get_type() == STRING_EDGE) {
+      CharSet *charset_ptr = edge->get_charset();
+      Location loc = edge->get_loc();
 
       // check the character set
       charset_ptr->check(this, loc);
 
       // look for duplicate charsets that only have punctuation
       if (charset_ptr->only_has_punc_and_spaces()) {
-	string charset_str = charset_ptr->get_charset_as_string();
+	std::string charset_str = charset_ptr->get_charset_as_string();
         bool ignored = false;
         if (charset_str == "+-" || charset_str == "-+") {
           ignored = true;
@@ -184,7 +183,7 @@ Path::check_charsets()
           bool found_dup = false;
           for (unsigned int i = 0; i < charsets.size() && !found_dup; i++) {
             if (charset_str == charsets[i]) {
-              string msg = "Duplicate character set of punctuation marks can lead to mismatched punctuation usage";
+                std::string msg = "Duplicate character set of punctuation marks can lead to mismatched punctuation usage";
               char c1 = charset_ptr->get_valid_character();
               char c2 = charset_ptr->get_valid_character(c1);
               Alert a("duplicate punc charset", msg, locs[i], loc);
@@ -228,21 +227,21 @@ Path::check_optional_braces()
   Location opt_rbrace_loc;
 
   // Traverse path
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    Location loc = edges[i]->get_loc();
-    if (edges[i]->is_opt_repeat_begin()) {
+  for (auto & edge : edges) {
+    Location loc = edge->get_loc();
+    if (edge->is_opt_repeat_begin()) {
       prev_opt_repeat = true;
       prev_opt_char = false;
     }
     // TODO: This does not capture situations where a group has a single character
-    else if (prev_opt_repeat && edges[i]->get_type() == CHARACTER_EDGE) {
+    else if (prev_opt_repeat && edge->get_type() == CHARACTER_EDGE) {
       prev_opt_char = true;
-      prev_char = edges[i]->get_character();
+      prev_char = edge->get_character();
       prev_opt_repeat = false;
       prev_opt_loc = loc;
     }
-    else if (prev_opt_char && edges[i]->is_opt_repeat_end()) {
-      Location l = make_pair(prev_opt_loc.first, loc.second);
+    else if (prev_opt_char && edge->is_opt_repeat_end()) {
+      Location l = std::make_pair(prev_opt_loc.first, loc.second);
       prev_opt_char = false;
       prev_opt_repeat = false;
       switch (prev_char) {
@@ -262,63 +261,63 @@ Path::check_optional_braces()
 
   // Signal violations
   if (opt_lparen && opt_rparen) {
-    string msg = "Optional ( and ) found - accepts strings that have one but not the other";
+    std::string msg = "Optional ( and ) found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_lparen_loc, opt_rparen_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_lparen_loc, '(', opt_rparen_loc);
     Util::get()->add_alert(a);
   }
   if (opt_lparen && !opt_rparen) {
-    string msg = "Optional ( found - accepts strings that have one but not the other";
+    std::string msg = "Optional ( found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_lparen_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_lparen_loc, '(');
     Util::get()->add_alert(a);
   }
   if (!opt_lparen && opt_rparen) {
-    string msg = "Optional ) found - accepts strings that have one but not the other";
+    std::string msg = "Optional ) found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_rparen_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_rparen_loc, ')');
     Util::get()->add_alert(a);
   }
   if (opt_lcurly && opt_rcurly) {
-    string msg = "Optional { and } found - accepts strings that have one but not the other";
+    std::string msg = "Optional { and } found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_lcurly_loc, opt_rcurly_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_lcurly_loc, '{', opt_rcurly_loc);
     Util::get()->add_alert(a);
   }
   if (opt_lcurly && !opt_rcurly) {
-    string msg = "Optional { found - accepts strings that have one but not the other";
+    std::string msg = "Optional { found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_lcurly_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_lcurly_loc, '{');
     Util::get()->add_alert(a);
   }
   if (!opt_lcurly && opt_rcurly) {
-    string msg = "Optional } found - accepts strings that have one but not the other";
+    std::string msg = "Optional } found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_rcurly_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_rcurly_loc, '}');
     Util::get()->add_alert(a);
   }
   if (opt_lbrace && opt_rbrace) {
-    string msg = "Optional [ and ] found - accepts strings that have one but not the other";
+    std::string msg = "Optional [ and ] found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_lbrace_loc, opt_rbrace_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_lbrace_loc, '[', opt_rbrace_loc);
     Util::get()->add_alert(a);
   }
   if (opt_lbrace && !opt_rbrace) {
-    string msg = "Optional [ found - accepts strings that have one but not the other";
+    std::string msg = "Optional [ found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_lbrace_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_lbrace_loc, '[');
     Util::get()->add_alert(a);
   }
   if (!opt_lbrace && opt_rbrace) {
-    string msg = "Optional ] found - accepts strings that have one but not the other";
+    std::string msg = "Optional ] found - accepts strings that have one but not the other";
     Alert a("optional brace", msg, opt_rbrace_loc);
     a.has_example = true;
     a.example = gen_example_string(opt_rbrace_loc, ']');
@@ -348,8 +347,8 @@ Path::check_wild_punctuation()
         Location prev_loc = edges[prev_edge]->get_loc();
         if (ispunct(c) && edges[i]->is_valid_character(c)) {
           Location loc = edges[i]->get_loc();
-          string fix = edges[i]->fix_wild_punctuation(c);
-          string msg = "Wildcard may wish to exclude adjacent punctuation mark " + string(1, c);
+          std::string fix = edges[i]->fix_wild_punctuation(c);
+          std::string msg = "Wildcard may wish to exclude adjacent punctuation mark " + std::string(1, c);
           Alert a("wild punctuation", msg, fix, loc, prev_loc);
           a.has_example = true;
           a.example = gen_example_string(loc, c);
@@ -371,8 +370,8 @@ Path::check_wild_punctuation()
         Location next_loc = edges[next_edge]->get_loc();
         if (ispunct(c) && edges[i]->is_valid_character(c)) {
           Location loc = edges[i]->get_loc();
-          string fix = edges[i]->fix_wild_punctuation(c);
-          string msg = "Wildcard may wish to exclude adjacent punctuation mark " + string(1, c);
+          std::string fix = edges[i]->fix_wild_punctuation(c);
+          std::string msg = "Wildcard may wish to exclude adjacent punctuation mark " + std::string(1, c);
           Alert a("wild punctuation", msg, fix, loc, next_loc);
           a.has_example = true;
           a.example = gen_example_string(loc, c);
@@ -391,15 +390,15 @@ Path::check_repeat_punctuation()
   char prev_char;
   Location prev_loc;
 
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    Location curr_loc = edges[i]->get_loc();
-    if (edges[i]->is_str_repeat_punc_candidate()) {
-      char c = edges[i]->get_repeat_punc_char();
+  for (auto & edge : edges) {
+    Location curr_loc = edge->get_loc();
+    if (edge->is_str_repeat_punc_candidate()) {
+      char c = edge->get_repeat_punc_char();
 
-      string repeat_str = string(1, c);
+        std::string repeat_str = std::string(1, c);
       int limit = 3;
-      int lower_limit = edges[i]->get_repeat_lower_limit();
-      int upper_limit = edges[i]->get_repeat_upper_limit();
+      int lower_limit = edge->get_repeat_lower_limit();
+      int upper_limit = edge->get_repeat_upper_limit();
 
       if (lower_limit > 3) {
         limit = lower_limit;
@@ -412,33 +411,33 @@ Path::check_repeat_punctuation()
       }
 
       if (lower_limit != upper_limit) {
-        string msg = "Punctuation mark may be repeated two or more times: " + string(1, c);
+          std::string msg = "Punctuation mark may be repeated two or more times: " + std::string(1, c);
         Alert a("repeat punctuation", msg, curr_loc);
         a.has_example = true;
         a.example = gen_example_string(curr_loc, repeat_str);
         Util::get()->add_alert(a);
       }
     }
-    else if (edges[i]->is_repeat_begin()) {
+    else if (edge->is_repeat_begin()) {
       prev_repeat = true;
       prev_candidate = false;
     }
     // TODO: This does not capture situations where a group has a single character
-    else if (prev_repeat && edges[i]->is_repeat_punc_candidate()) {
-      prev_char = edges[i]->get_repeat_punc_char();
+    else if (prev_repeat && edge->is_repeat_punc_candidate()) {
+      prev_char = edge->get_repeat_punc_char();
       prev_repeat = false;
       prev_candidate = true;
       prev_loc = curr_loc;
     }
-    else if (prev_candidate && edges[i]->is_repeat_end()) {
-      Location loc = make_pair(prev_loc.first, curr_loc.second);
+    else if (prev_candidate && edge->is_repeat_end()) {
+      Location loc = std::make_pair(prev_loc.first, curr_loc.second);
       prev_repeat = false;
       prev_candidate = false;
 
-      string repeat_str = string(1, prev_char);
+      std::string repeat_str = std::string(1, prev_char);
       int limit = 3;
-      int lower_limit = edges[i]->get_repeat_lower_limit();
-      int upper_limit = edges[i]->get_repeat_upper_limit();
+      int lower_limit = edge->get_repeat_lower_limit();
+      int upper_limit = edge->get_repeat_upper_limit();
 
       if (lower_limit > 3) {
         limit = lower_limit;
@@ -451,7 +450,7 @@ Path::check_repeat_punctuation()
       }
 
       if (lower_limit != upper_limit) {
-        string msg = "Punctuation mark may be repeated two or more times: " + string(1, prev_char);
+          std::string msg = "Punctuation mark may be repeated two or more times: " + std::string(1, prev_char);
         Alert a("repeat punctuation", msg, prev_loc, curr_loc);
         a.has_example = true;
         a.example = gen_example_string(loc, repeat_str);
@@ -486,17 +485,16 @@ Path::check_digit_too_optional()
     else if (prev_candidate && edges[i]->is_zero_repeat_end()) {
       prev_repeat = false;
       prev_candidate = false;
-      string example = gen_min_iter_string();
+      std::string example = gen_min_iter_string();
 
       bool found_digit = false;
-      for (unsigned int i = 0; i < example.size(); i++) {
-        char c = example[i];
+      for (char c : example) {
         if (c >= '0' && c <= '9') found_digit = true;
       }
 
       if (!found_digit) {
-        Location loc = make_pair(prev_loc.first, curr_loc.second);
-        string msg = "Digit range allows for zero digits casuing a string with no digits to be accepted";
+        Location loc = std::make_pair(prev_loc.first, curr_loc.second);
+        std::string msg = "Digit range allows for zero digits casuing a string with no digits to be accepted";
         Alert a("digit too optional", msg, loc);
         a.has_example = true;
         a.example = example;
@@ -512,50 +510,50 @@ Path::check_digit_too_optional()
 
 // TEST STRING GENERATION FUNCTIONS
 
-string
+std::string
 Path::gen_example_string(Location loc, char c)
 {
-  string example;
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    edges[i]->process_edge(example, this);
+  std::string example;
+  for (auto & edge : edges) {
+    edge->process_edge(example, this);
 
-    Location edge_loc = edges[i]->get_loc();
+    Location edge_loc = edge->get_loc();
     if (edge_loc.first == loc.first) {
       example += c;
     }
     else {
-      example += edges[i]->get_substring();
+      example += edge->get_substring();
     }
   }
 
   return example;
 }
 
-string
+std::string
 Path::gen_example_string(Location loc, char c, char except)
 {
-  string example;
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    edges[i]->process_edge(example, this);
+    std::string example;
+  for (auto & edge : edges) {
+    edge->process_edge(example, this);
 
-    Location edge_loc = edges[i]->get_loc();
+    Location edge_loc = edge->get_loc();
     if (edge_loc.first == loc.first) {
       example += c;
     }
     else {
-      string sub = edges[i]->get_substring();
-      string except_str = string(1, except);
+      std::string sub = edge->get_substring();
+      std::string except_str = std::string(1, except);
       if (sub == except_str) {
-        if (edges[i]->get_type() == CHAR_SET_EDGE) {
-          char c =  edges[i]->get_charset()->get_valid_character(except);
+        if (edge->get_type() == CHAR_SET_EDGE) {
+          char c =  edge->get_charset()->get_valid_character(except);
           example += c;
         }
         else {
-          example += edges[i]->get_substring();
+          example += edge->get_substring();
         }
       }
       else {
-        example += edges[i]->get_substring();
+        example += edge->get_substring();
       }
     }
   }
@@ -563,14 +561,14 @@ Path::gen_example_string(Location loc, char c, char except)
   return example;
 }
 
-string
+std::string
 Path::gen_example_string(Location loc, char c, Location omit)
 {
-  string example;
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    edges[i]->process_edge(example, this);
+    std::string example;
+  for (auto & edge : edges) {
+    edge->process_edge(example, this);
 
-    Location edge_loc = edges[i]->get_loc();
+    Location edge_loc = edge->get_loc();
     if (edge_loc.first == loc.first) {
       example += c;
     }
@@ -578,21 +576,21 @@ Path::gen_example_string(Location loc, char c, Location omit)
       continue;
     }
     else {
-      example += edges[i]->get_substring();
+      example += edge->get_substring();
     }
   }
 
   return example;
 }
 
-string
+std::string
 Path::gen_example_string(Location loc1, char c1, Location loc2, char c2)
 {
-  string example;
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    edges[i]->process_edge(example, this);
+  std::string example;
+  for (auto & edge : edges) {
+    edge->process_edge(example, this);
 
-    Location edge_loc = edges[i]->get_loc();
+    Location edge_loc = edge->get_loc();
     if (edge_loc.first == loc1.first) {
       example += c1;
     }
@@ -600,22 +598,22 @@ Path::gen_example_string(Location loc1, char c1, Location loc2, char c2)
       example += c2;
     }
     else {
-      example += edges[i]->get_substring();
+      example += edge->get_substring();
     }
   }
 
   return example;
 }
 
-string
-Path::gen_example_string(Location loc, string replace)
+std::string
+Path::gen_example_string(Location loc, const std::string& replace)
 {
-  string example;
+  std::string example;
   bool in_replace = false;
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    edges[i]->process_edge(example, this);
+  for (auto & edge : edges) {
+    edge->process_edge(example, this);
 
-    Location edge_loc = edges[i]->get_loc();
+    Location edge_loc = edge->get_loc();
     if (edge_loc.first == loc.first) {
       example += replace;
       in_replace = (edge_loc.second != loc.second);
@@ -624,47 +622,46 @@ Path::gen_example_string(Location loc, string replace)
       in_replace = false;
     }
     else if (!in_replace) {
-      example += edges[i]->get_substring();
+      example += edge->get_substring();
     }
   }
 
   return example;
 }
 
-string
+std::string
 Path::gen_backref_string(Location loc)
 {
   // Assumes edges have been processed (called during test generation)
-  string backref;
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    Location edge_loc = edges[i]->get_loc();
+  std::string backref;
+  for (auto & edge : edges) {
+    Location edge_loc = edge->get_loc();
     if (edge_loc.first > loc.first && edge_loc.first < loc.second) {
-      backref += edges[i]->get_substring();
+      backref += edge->get_substring();
     }
   }
   return backref;
 }
 
-string
+std::string
 Path::gen_min_iter_string()
 {
-  string min_iter_string;
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    edges[i]->gen_min_iter_string(min_iter_string);
+  std::string min_iter_string;
+  for (auto & edge : edges) {
+    edge->gen_min_iter_string(min_iter_string);
   }
   return min_iter_string;
 }
 
-vector <string>
-Path::gen_evil_strings(const set <char> &punct_marks)
+std::vector <std::string>
+Path::gen_evil_strings(const std::set <char> &punct_marks)
 {
-  vector <string> evil_strings;
+  std::vector <std::string> evil_strings;
 
   // add strings for interesting edges (char sets, strings, and loops)
-  for (unsigned int i = 0; i < evil_edges.size(); i++) {
-    int index = evil_edges[i];
-    vector <string> new_strings = edges[index]->gen_evil_strings(test_string, punct_marks);
-    vector <string>::iterator tsi;
+  for (int index : evil_edges) {
+    std::vector <std::string> new_strings = edges[index]->gen_evil_strings(test_string, punct_marks);
+    std::vector <std::string>::iterator tsi;
     for (tsi = new_strings.begin(); tsi != new_strings.end(); tsi++) {
       evil_strings.push_back(*tsi);
     }
@@ -677,6 +674,6 @@ Path::gen_evil_strings(const set <char> &punct_marks)
 void
 Path::print()
 {
-  for (unsigned int i = 0; i < edges.size(); i++)
-    edges[i]->print();
+  for (auto & edge : edges)
+    edge->print();
 }

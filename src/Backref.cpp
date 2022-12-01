@@ -23,18 +23,17 @@
 #include <set>
 #include <string>
 #include "Backref.h"
-using namespace std;
 
 void
-Backref::gen_min_iter_string(string &min_iter_string)
+Backref::gen_min_iter_string(std::string &min_iter_string)
 {
   min_iter_string.append(get_substring());
 }
 
-vector <string>
-Backref::gen_evil_strings(string test_string)
+std::vector <std::string>
+Backref::gen_evil_strings(std::string test_string)
 {
-  vector <string> evil_strings;
+  std::vector <std::string> evil_strings;
   return evil_strings;
 
 #if 0 // TODO: Reimplement backreference evil strings
@@ -174,10 +173,10 @@ gen_evil_backreference_strings(vector <int> &backrefs_done)
 void
 Backref::print()
 {
-  cout << "Group " << group_number;
-  if (group_name != "") {
-    cout << "(" << group_name << ")";
+  std::cout << "Group " << group_number;
+  if (!group_name.empty()) {
+    std::cout << "(" << group_name << ")";
   }
-  cout << " @ (" << group_loc.first << "," << group_loc.second << ")";
+  std::cout << " @ (" << group_loc.first << "," << group_loc.second << ")";
 }
 

@@ -33,14 +33,12 @@
 #include "TestGenerator.h"
 #include "Util.h"
 
-using namespace std;
-
-vector <string>
-run_engine(string regex, string base_substring, bool check_mode = false, bool web_mode = false,
+std::vector <std::string>
+run_engine(std::string regex, std::string base_substring, bool check_mode = false, bool web_mode = false,
     bool debug_mode = false, bool stat_mode = false)
 {
   Stats stats;
-  vector <string> test_strings;
+  std::vector <std::string> test_strings;
 
   try {
 
@@ -48,8 +46,9 @@ run_engine(string regex, string base_substring, bool check_mode = false, bool we
     if (base_substring.length() < 2) {
       throw EgretException("ERROR (bad arguments): Base substring must have at least two letters");
     }
-    for (unsigned int i = 0; i < base_substring.length(); i++) {
-      if (!isalpha(base_substring[i])) {
+
+    for (char i : base_substring) {
+      if (!isalpha(i)) {
         throw EgretException("ERROR (bad arguments): Base substring can only contain letters");
       }
     }
@@ -58,7 +57,7 @@ run_engine(string regex, string base_substring, bool check_mode = false, bool we
     Util::get()->init(regex, check_mode, web_mode, base_substring);
 
     // start debug mode
-    if (debug_mode) cout << "RegEx: " << regex << endl;
+    if (debug_mode) std::cout << "RegEx: " << regex << std::endl;
      
     // initialize scanner with regex
     Scanner scanner;
@@ -79,10 +78,9 @@ run_engine(string regex, string base_substring, bool check_mode = false, bool we
     if (stat_mode) nfa.add_stats(stats);
 
     // traverse NFA basis paths and process them
-    vector <Path> paths = nfa.find_basis_paths();
-    vector <Path>::iterator path_iter;
-    for (path_iter = paths.begin(); path_iter != paths.end(); path_iter++) {
-      path_iter->process_path();
+    std::vector <Path> paths = nfa.find_basis_paths();
+    for (auto & path : paths) {
+      path.process_path();
     }
 
     // run checker
@@ -106,7 +104,7 @@ run_engine(string regex, string base_substring, bool check_mode = false, bool we
   }
 
   // Add alerts to front of list.
-  vector <string> alerts = Util::get()->get_alerts();
+  std::vector <std::string> alerts = Util::get()->get_alerts();
   if (check_mode) {
     if (alerts.size() == 0) {
       alerts.insert(alerts.begin(), "No violations detected.");

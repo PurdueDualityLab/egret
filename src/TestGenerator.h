@@ -29,31 +29,30 @@
 #include <string>
 #include <vector>
 #include "Path.h"
-using namespace std;
 
 class TestGenerator {
 
 public:
 
-  TestGenerator(vector <Path> p, set <char> m, bool d) {
+  TestGenerator(std::vector <Path> p, std::set <char> m, bool d) {
     paths = p;
     punct_marks = m;
     debug_mode = d;
   }
 
   // generate test strings
-  vector <string> gen_test_strings();
+  std::vector <std::string> gen_test_strings();
 
   // add test generation stats
   void add_stats(Stats &stats);
 
 private:
 
-  vector <Path> paths;		// list of paths
-  set <char> punct_marks;	// set of punct marks
+  std::vector <Path> paths;		// list of paths
+  std::set <char> punct_marks;	// set of punct marks
   bool debug_mode;		// set if debug mode is on
 
-  vector <string> test_strings;     // list of test strings
+  std::vector <std::string> test_strings;     // list of test strings
 
   int num_gen_strings;          // number of generated strings (for stats)
 

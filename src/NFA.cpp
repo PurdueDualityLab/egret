@@ -29,7 +29,6 @@
 #include "NFA.h"
 #include "ParseTree.h"
 #include "Util.h"
-using namespace std;
 
 // TODO: No location information for epsilon edge.  OK?
 static Edge EPSILON = Edge(EPSILON_EDGE);
@@ -44,7 +43,7 @@ NFA::NFA(unsigned int _size, unsigned int _initial, unsigned int  _final)
   assert(final < size);
 
   // initialize edge table with an "empty graph"
-  vector <Edge *> empty_row(size, NULL);
+  std::vector <Edge *> empty_row(size, nullptr);
   for (unsigned int i = 0; i < size; i++) {
     edge_table.push_back(empty_row);
   }
@@ -215,7 +214,7 @@ NFA::build_nfa_string(ParseNode *tree)
   NFA nfa(2, 0, 1);
   RegexString *regex_str =
     new RegexString(tree->left->char_set, tree->repeat_lower, tree->repeat_upper);
-  Location loc = make_pair(tree->left->loc.first, tree->loc.second);
+  Location loc = std::make_pair(tree->left->loc.first, tree->loc.second);
   Edge *edge = new Edge(STRING_EDGE, loc, regex_str);
   nfa.add_edge(0, 1, edge);
 
@@ -324,8 +323,8 @@ NFA::shift_states(unsigned int shift)
   if (shift < 1) return;
 
   // create a new, empty edge table (of the new size)
-  vector <Edge *> empty_row(new_size, NULL);
-  vector <vector <Edge *> > new_edge_table(new_size, empty_row);
+  std::vector <Edge *> empty_row(new_size, NULL);
+  std::vector <std::vector <Edge *> > new_edge_table(new_size, empty_row);
 
   // copy all the edges to the new table, at their new locations
   for (unsigned int i = 0; i < size; i++) {
@@ -357,12 +356,12 @@ void
 NFA::append_empty_state()
 {
   // append a new row (already with a larger size)
-  vector <Edge *> empty_row(size + 1, NULL);
+    std::vector <Edge *> empty_row(size + 1, nullptr);
   edge_table.push_back(empty_row);
 
   // append a new column
   for (unsigned int i = 0; i < size; i++)
-    edge_table[i].push_back(NULL);
+    edge_table[i].push_back(nullptr);
 
   size += 1;
 }
@@ -383,24 +382,24 @@ NFA::is_regex_string(ParseNode *node, int repeat_lower, int repeat_upper)
   return true;
 }
 
-vector <Path>
+std::vector <Path>
 NFA::find_basis_paths()
 {
   Path path(initial);
-  vector <Path> paths;
+  std::vector <Path> paths;
   bool *visited = new bool[size];
   for (unsigned int i = 0; i < size; i++)
     visited[i] = false;
 
   traverse(initial, path, paths, visited);
 
-  delete visited;
+  delete[] visited;
 
   return paths;
 }
 
 void
-NFA::traverse(unsigned int curr_state, Path path, vector <Path> &paths,
+NFA::traverse(unsigned int curr_state, Path path, std::vector <Path> &paths,
     bool *visited)
 {
   // stop if you already have been here
@@ -416,7 +415,7 @@ NFA::traverse(unsigned int curr_state, Path path, vector <Path> &paths,
   // for each adjacent state, find all paths 
   for (unsigned int next_state = 0; next_state < size; next_state++) {
     Edge *edge = edge_table[curr_state][next_state];
-    if (edge == NULL) continue;
+    if (edge == nullptr) continue;
     path.append(edge, next_state);
     traverse(next_state, path, paths, visited);
     path.remove_last();
@@ -427,25 +426,25 @@ NFA::traverse(unsigned int curr_state, Path path, vector <Path> &paths,
 void
 NFA::print()
 {
-  cout << "NFA: " << endl;
-  cout << "Number of states: " << size << " ";
-  cout << "Initial state: " << initial << " ";
-  cout << "Final state: " << final << endl;
+  std::cout << "NFA: " << std::endl;
+  std::cout << "Number of states: " << size << " ";
+  std::cout << "Initial state: " << initial << " ";
+  std::cout << "Final state: " << final << std::endl;
   
-  cout << "Edge table: " << endl;
+  std::cout << "Edge table: " << std::endl;
   for (unsigned int from = 0; from < size; from++) {
-    cout << "State " << from << ": ";
-    cout << endl;
+    std::cout << "State " << from << ": ";
+    std::cout << std::endl;
     for (unsigned int to = 0; to < size; to++) {
       Edge *edge = edge_table[from][to];
-      if (edge != NULL) {
-        cout << "  To state " << to << " on ";
+      if (edge != nullptr) {
+          std::cout << "  To state " << to << " on ";
 	edge->print();
       }
     }
   }
 
-  cout << endl;
+    std::cout << std::endl;
 }
 
 void

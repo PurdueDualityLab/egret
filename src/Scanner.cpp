@@ -31,10 +31,8 @@
 #include "Stats.h"
 #include "Util.h"
 
-using namespace std;
-
 void
-Scanner::init(string in)
+Scanner::init(std::string in)
 {
   unsigned int idx = 0;
   bool in_set = false;	// set to true when in the middle of set [] 
@@ -381,7 +379,7 @@ Scanner::init(string in)
 
   // Check tokens
   int curr_index = 0;
-  vector <Token>::iterator vi;
+    std::vector <Token>::iterator vi;
   for (vi = tokens.begin(); vi != tokens.end(); vi++) {
     int start = vi->loc.first;
     int end = vi->loc.second;
@@ -398,7 +396,7 @@ Scanner::init(string in)
 }
 
 char
-Scanner::get_next_char(string in, unsigned int &idx)
+Scanner::get_next_char(std::string in, unsigned int &idx)
 {
   idx++;
   if (idx >= in.length()) {
@@ -408,7 +406,7 @@ Scanner::get_next_char(string in, unsigned int &idx)
 }
 
 Token
-Scanner::process_octal(string in, unsigned int &idx, char first_digit)
+Scanner::process_octal(std::string in, unsigned int &idx, char first_digit)
 {
   bool octal_found = false;
   bool only_one_digit = false;
@@ -470,7 +468,7 @@ Scanner::process_octal(string in, unsigned int &idx, char first_digit)
 
     // check the validity of the octal value
     if (octal_value > 126 || (octal_value < 32 && !Util::get()->is_check_mode())) {
-      stringstream s;
+        std::stringstream s;
       s << "ERROR (unsupported): contains unsupported octal value " << octal_value;
       throw EgretException(s.str());
     }
@@ -489,7 +487,7 @@ Scanner::process_octal(string in, unsigned int &idx, char first_digit)
 }
     
 Token
-Scanner::process_hex(string in, unsigned int &idx, int num_digits)
+Scanner::process_hex(std::string in, unsigned int &idx, int num_digits)
 {
   Token token;
   token.loc.first = idx - 1;
@@ -510,7 +508,7 @@ Scanner::process_hex(string in, unsigned int &idx, int num_digits)
       digit_val = digit - 'a' + 10;
     }
     else {
-      stringstream s;
+        std::stringstream s;
       s << "ERROR (parse error): Invalid hex digit " << digit;
       throw EgretException(s.str());
     }
@@ -520,7 +518,7 @@ Scanner::process_hex(string in, unsigned int &idx, int num_digits)
 
   // check the validity of the hex value
   if (hex_value > 126 || (hex_value < 32 && !Util::get()->is_check_mode())) {
-    stringstream s;
+      std::stringstream s;
     s << "ERROR (unsupported): contains unsupported hex value " << hex_value;
     throw EgretException(s.str());
   }
@@ -533,7 +531,7 @@ Scanner::process_hex(string in, unsigned int &idx, int num_digits)
 }
 
 Token
-Scanner::process_extension(string in, unsigned int &idx)
+Scanner::process_extension(std::string in, unsigned int &idx)
 {
   Token token;
   token.loc.first = idx;
@@ -551,7 +549,7 @@ Scanner::process_extension(string in, unsigned int &idx)
   {
     char c = get_next_char(in, idx);
     if (c == '=') {
-      stringstream s;
+      std::stringstream s;
       while (c != ')') {
 	c = get_next_char(in, idx);
 	if  (c != ')')
@@ -566,7 +564,7 @@ Scanner::process_extension(string in, unsigned int &idx)
       throw EgretException("ERROR (parse error): Improperly specified named group - expected < after (?P");
     }
     else {
-      stringstream s;
+      std::stringstream s;
       while (c != '>') {
         c = get_next_char(in, idx);
 	if (c != '>')
@@ -590,9 +588,9 @@ Scanner::process_extension(string in, unsigned int &idx)
   case 'u':
   case 'x':
   {
-    stringstream s;
+    std::stringstream s;
     s << "Regex contains ignored extension ?" << ext;
-    Alert a("ignored", s.str(), make_pair(start_loc, idx));
+    Alert a("ignored", s.str(), std::make_pair(start_loc, idx));
     a.warning = true;
     Util::get()->add_alert(a);
     token.type = IGNORED_EXT;
@@ -602,9 +600,9 @@ Scanner::process_extension(string in, unsigned int &idx)
   case '<':
   {
     char c = get_next_char(in, idx);
-    stringstream s;
+    std::stringstream s;
     s << "Regex contains ignored extension ?<" << c;
-    Alert a("ignored", s.str(), make_pair(start_loc, idx));
+    Alert a("ignored", s.str(), std::make_pair(start_loc, idx));
     a.warning = true;
     Util::get()->add_alert(a);
     token.type = IGNORED_EXT;
@@ -613,7 +611,7 @@ Scanner::process_extension(string in, unsigned int &idx)
 
   default:
   {
-    stringstream s;
+    std::stringstream s;
     s << "ERROR (internal): Unexpected extension ?" << ext;
     throw EgretException(s.str());
   }
@@ -624,7 +622,7 @@ Scanner::process_extension(string in, unsigned int &idx)
 }
 
 Token
-Scanner::process_repeat(string in, unsigned int &idx)
+Scanner::process_repeat(std::string in, unsigned int &idx)
 {
   // Based on execution of Python, the repeat quantifier must have one of these forms:
   // {n}  	: matches exactly n times
@@ -652,7 +650,7 @@ Scanner::process_repeat(string in, unsigned int &idx)
   token.character = '{';
 
   // Keep looping while reading in digits.
-  string count_str = "";
+  std::string count_str = "";
   char c = get_next_char(in, idx);
   while (isdigit(c)) {
     count_str += c;
@@ -667,7 +665,7 @@ Scanner::process_repeat(string in, unsigned int &idx)
     }
     // Otherwise store lower bound
     else {
-      stringstream ss(count_str);
+      std::stringstream ss(count_str);
       ss >> token.repeat_lower; 
     }
   }
@@ -680,7 +678,7 @@ Scanner::process_repeat(string in, unsigned int &idx)
       return token;
     }
     // Otherwise return REPEAT token with identical lower and upper bounds
-    stringstream ss(count_str);
+      std::stringstream ss(count_str);
     ss >> token.repeat_lower; 
     token.repeat_upper = token.repeat_lower;
     token.type = REPEAT;
@@ -712,7 +710,7 @@ Scanner::process_repeat(string in, unsigned int &idx)
     }
     // Otherwise store upper bound
     else {
-      stringstream ss(count_str);
+        std::stringstream ss(count_str);
       ss >> token.repeat_upper; 
     }
 
@@ -733,9 +731,9 @@ Scanner::process_repeat(string in, unsigned int &idx)
 
     // Check that lower bound is less than or equal to the upper bound
     if (token.repeat_lower > token.repeat_upper) {
-      stringstream s;
+        std::stringstream s;
       s << "ERROR (parse error): Invalid repeat quantifier: lower bound " << token.repeat_lower
-	<< " is greater than upper bound " << token.repeat_upper << endl;
+	<< " is greater than upper bound " << token.repeat_upper << std::endl;
       throw EgretException(s.str());
     }
 
@@ -764,7 +762,7 @@ Scanner::get_type()
     return ERR;
 }
 
-string
+std::string
 Scanner::get_type_str()
 {
   return token_type_to_str(get_type());
@@ -778,7 +776,7 @@ Scanner::get_loc()
   }
   else {
     Location loc = tokens[tokens.size() - 1].loc;
-    return make_pair(loc.second + 1, loc.second + 1);
+    return std::make_pair(loc.second + 1, loc.second + 1);
   }
 }
 
@@ -818,7 +816,7 @@ Scanner::get_group_num()
   return tokens[index].group_num;
 }
 
-string
+std::string
 Scanner::get_group_name()
 {
   TokenType type = get_type();
@@ -883,22 +881,22 @@ Scanner::is_char_range()
 void
 Scanner::print()
 {
-  cout << "Scanner: " << endl;
-  for (unsigned i = 0; i < tokens.size(); i++) {
-    cout << tokens[i].loc.first << "-" << tokens[i].loc.second << ": ";
-    cout << token_type_to_str(tokens[i].type);
-    if (tokens[i].type == REPEAT) {
-      cout << ":" << tokens[i].repeat_lower << "," << tokens[i].repeat_upper;
+  std::cout << "Scanner: " << std::endl;
+  for (auto & token : tokens) {
+    std::cout << token.loc.first << "-" << token.loc.second << ": ";
+    std::cout << token_type_to_str(token.type);
+    if (token.type == REPEAT) {
+      std::cout << ":" << token.repeat_lower << "," << token.repeat_upper;
     }
-    if (tokens[i].type == CHARACTER || tokens[i].type == CHAR_CLASS) {
-      cout << ":" << tokens[i].character;
+    if (token.type == CHARACTER || token.type == CHAR_CLASS) {
+      std::cout << ":" << token.character;
     }
-    cout << endl;
+    std::cout << std::endl;
   }
-  cout << endl;
+  std::cout << std::endl;
 }
 
-string
+std::string
 Scanner::token_type_to_str(TokenType type)
 {
   switch (type) {

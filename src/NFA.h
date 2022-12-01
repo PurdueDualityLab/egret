@@ -31,13 +31,12 @@
 #include "ParseTree.h"
 #include "Path.h"
 #include "Stats.h"
-using namespace std;
 
 class NFA {
 
 public:
 
-  NFA() {}
+  NFA() = default;
   NFA(unsigned int _size, unsigned int _initial, unsigned int _final);
   NFA(const NFA &other);
   NFA &operator= (const NFA &other);
@@ -46,7 +45,7 @@ public:
   void build(ParseTree &tree);
 
   // create a set of basis paths
-  vector <Path> find_basis_paths();
+  std::vector <Path> find_basis_paths();
 
   // print out the NFA
   void print();
@@ -59,7 +58,7 @@ private:
   unsigned int size;			// number of states
   unsigned int initial;			// initial state
   unsigned int final;			// final state
-  vector <vector <Edge *> > edge_table;	// edge table
+  std::vector <std::vector <Edge *> > edge_table;	// edge table
   
   // builds an NFA from tree
   NFA build_nfa_from_tree(ParseNode *tree);
@@ -116,7 +115,7 @@ private:
   bool is_regex_string(ParseNode *node, int repeat_lower, int repeat_upper);
 
   // utility function to find all paths through the NFA
-  void traverse(unsigned int curr_state, Path path, vector <Path> &paths,
+  void traverse(unsigned int curr_state, Path path, std::vector <Path> &paths,
       bool *visited);
 };
 

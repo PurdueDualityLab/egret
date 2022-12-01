@@ -89,7 +89,6 @@
 #include "Backref.h"
 #include "CharSet.h"
 #include "Stats.h"
-using namespace std;
 
 typedef enum
 {
@@ -115,7 +114,7 @@ struct ParseNode
     char_set = NULL;
   }
 
-  ParseNode(NodeType t, Location _loc, string _name, ParseNode *l, ParseNode *r) {
+  ParseNode(NodeType t, Location _loc, std::string _name, ParseNode *l, ParseNode *r) {
     assert(t == GROUP_NODE);
     type = t;
     loc = _loc;
@@ -173,7 +172,7 @@ struct ParseNode
   int repeat_lower;	// For REPEAT_NODE
   int repeat_upper;	// For REPEAT_NODE (-1 for no limit)
   Backref *backref;     // For BACKREFERENCE_NODE
-  string group_name;    // For GROUP_NODE
+  std::string group_name;    // For GROUP_NODE
 };
 
 class ParseTree {
@@ -187,7 +186,7 @@ public:
   ParseNode *get_root() { return root; }
 
   // get set of punctuation marks
-  set<char> get_punct_marks() { return punct_marks; }
+  std::set<char> get_punct_marks() { return punct_marks; }
 
   // prints the tree
   void print();
@@ -199,9 +198,9 @@ private:
 
   ParseNode *root;		// root of parse tree
   Scanner scanner;		// scanner
-  set<char> punct_marks;	// set of punctuation marks
-  unordered_map<int, Location> group_locs;
-  unordered_map<string, Location> named_group_locs;
+  std::set<char> punct_marks;	// set of punctuation marks
+  std::unordered_map<int, Location> group_locs;
+  std::unordered_map<std::string, Location> named_group_locs;
   int group_count;
 
   // creation functions

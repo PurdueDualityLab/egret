@@ -24,48 +24,53 @@
 
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
-using namespace std;
 
 // Location
-typedef pair <int, int> Location;
+typedef std::pair <int, int> Location;
 
 struct Alert {
 
   bool warning;
-  string type;
-  string message;
+  std::string type;
+  std::string message;
   bool has_suggest;
-  string suggest;
+    std::string suggest;
   bool has_example;
-  string example;
+    std::string example;
   Location loc1;
   Location loc2;
 
-  Alert(string t, string m) { 
-    warning = false; type = t; message = m; has_suggest = false; has_example = false;
-    loc1 = make_pair(-1, -1); loc2 = make_pair(-1, -1);
+  Alert(std::string t, std::string m) {
+    warning = false;
+    type = std::move(t);
+    message = std::move(m);
+    has_suggest = false;
+    has_example = false;
+    loc1 = std::make_pair(-1, -1);
+    loc2 = std::make_pair(-1, -1);
   }
-  Alert(string t, string m, Location l1) { 
-    warning = false; type = t; message = m; has_suggest = false; has_example = false;
-    loc1 = l1; loc2 = make_pair(-1, -1);
+  Alert(std::string t, std::string m, Location l1) {
+    warning = false; type = std::move(t); message = std::move(m); has_suggest = false; has_example = false;
+    loc1 = l1; loc2 = std::make_pair(-1, -1);
   }
-  Alert(string t, string m, Location l1, Location l2) { 
-    warning = false; type = t; message = m; has_suggest = false; has_example = false;
+  Alert(std::string t, std::string m, Location l1, Location l2) {
+    warning = false; type = std::move(t); message = std::move(m); has_suggest = false; has_example = false;
     loc1 = l1; loc2 = l2;
   }
-  Alert(string t, string m, string s) { 
-    warning = false; type = t; message = m; has_suggest = true; has_example = false;
-    suggest = s; loc1 = make_pair(-1, -1); loc2 = make_pair(-1, -1);
+  Alert(std::string t, std::string m, std::string s) {
+    warning = false; type = std::move(t); message = std::move(m); has_suggest = true; has_example = false;
+    suggest = std::move(s); loc1 = std::make_pair(-1, -1); loc2 = std::make_pair(-1, -1);
   }
-  Alert(string t, string m, string s, Location l1) { 
-    warning = false; type = t; message = m; has_suggest = true; has_example = false;
-    suggest = s; loc1 = l1; loc2 = make_pair(-1, -1);
+  Alert(std::string t, std::string m, std::string s, Location l1) {
+    warning = false; type = std::move(t); message = std::move(m); has_suggest = true; has_example = false;
+    suggest = std::move(s); loc1 = l1; loc2 = std::make_pair(-1, -1);
     
   }
-  Alert(string t, string m, string s, Location l1, Location l2) { 
-    warning = false; type = t; message = m; has_suggest = true; has_example = false;
-    suggest = s; loc1 = l1; loc2 = l2;
+  Alert(std::string t, std::string m, std::string s, Location l1, Location l2) {
+    warning = false; type = std::move(t); message = std::move(m); has_suggest = true; has_example = false;
+    suggest = std::move(s); loc1 = l1; loc2 = l2;
   }
 };
 
@@ -74,32 +79,32 @@ class Util {
 public:
   static Util* get();
 
-  void init(string r, bool c, bool w, string s);
+  void init(std::string r, bool c, bool w, std::string s);
 
-  bool is_check_mode() { return check_mode; }
-  bool is_web_mode() { return web_mode; }
-  string get_base_substring() { return base_substring; }
-  string get_regex() { return regex; }
-  vector<string> get_alerts() { return alerts; }
+  bool is_check_mode() const { return check_mode; }
+  bool is_web_mode() const { return web_mode; }
+  std::string get_base_substring() { return base_substring; }
+  std::string get_regex() { return regex; }
+  std::vector<std::string> get_alerts() { return alerts; }
 
   // Alerts 
   void add_alert(Alert alert);
 
 // TODO: Possibly create a new regex class where the "fixing" functions reside?
 private:
-  Util() {};            // singleton class, private constructor
+  Util() = default;            // singleton class, private constructor
   static Util *inst;
 
   // Global options
-  bool check_mode;
-  bool web_mode;
-  string base_substring; 
+  bool check_mode{};
+  bool web_mode{};
+  std::string base_substring;
 
-  string regex;                                 // original regular expression
+  std::string regex;                                 // original regular expression
 
   // Alerts
-  vector <string> alerts;                       // vector of alert strings
-  set <pair <string, int>> prev_alerts;         // all previous alerts
+  std::vector <std::string> alerts;                       // vector of alert strings
+  std::set <std::pair <std::string, int>> prev_alerts;         // all previous alerts
 
 };
      
@@ -107,14 +112,22 @@ private:
 // TODO: One idea is to add an add_error function that throws an exception that is caught at
 // the top level.
 // Egret Exception
-class EgretException {
+class EgretException : public std::exception {
 
 public:
-  EgretException(string msg) { error_msg = msg; }
-  string get_error() const { return error_msg; }
+  explicit EgretException(std::string msg) noexcept { error_msg = std::move(msg); }
+  EgretException(const EgretException &other) noexcept { error_msg = other.error_msg; }
+
+  const std::string &get_error() const { return error_msg; }
+
+    ~EgretException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override = default;
+
+    const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override {
+        return this->error_msg.c_str();
+    }
 
 private:
-  string error_msg;
+  std::string error_msg;
 };
 
 #endif // ERROR_H
