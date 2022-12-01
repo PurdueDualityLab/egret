@@ -53,46 +53,58 @@ public:
   }
 
   // constructors
-  Edge() { processed = false; }
-  Edge(EdgeType t) {
-    type = t;
-    loc = std::make_pair(-1, -1);
-    processed = false;
+  // Edge() { processed = false; }
+  explicit Edge(EdgeType t)
+  : type(t)
+  , loc(std::make_pair(-1, -1))
+  , processed(false)
+  , character(0) {
   }
-  Edge(EdgeType t, Location l) {
-    type = t;
-    loc = l;
-    processed = false;
+
+  Edge(EdgeType t, Location l)
+  : type(t)
+  , loc(std::move(l))
+  , processed(false)
+  , character(0) {
   }
-  Edge(EdgeType t, Location l, char c) {
-    type = t;
-    loc = l;
-    character = c;
-    processed = false;
+
+  Edge(EdgeType t, Location l, char c)
+  : type(t)
+  , loc(std::move(l))
+  , processed(false)
+  , character(c) {
   }
-  Edge(EdgeType t, Location l, std::unique_ptr<CharSet> c) {
-    type = t;
-    loc = l;
-    char_set = std::move(c);
-    processed = false;
+
+  Edge(EdgeType t, Location l, std::unique_ptr<CharSet> c)
+  : type(t)
+  , loc(std::move(l))
+  , processed(false)
+  , character(0)
+  , char_set(std::move(c)) {
   }
-  Edge(EdgeType t, Location l, std::unique_ptr<RegexString> r) {
-    type = t;
-    loc = l;
-    regex_str = std::move(r);
-    processed = false;
+
+  Edge(EdgeType t, Location l, std::unique_ptr<RegexString> r)
+  : type(t)
+  , loc(std::move(l))
+  , processed(false)
+  , character(0)
+  , regex_str(std::move(r)) {
   }
-  Edge(EdgeType t, Location l, std::unique_ptr<RegexLoop> r) {
-    type = t;
-    loc = l;
-    regex_loop = std::move(r);
-    processed = false;
+
+  Edge(EdgeType t, Location l, std::unique_ptr<RegexLoop> r)
+  : type(t)
+  , loc(std::move(l))
+  , processed(false)
+  , character(0)
+  , regex_loop(std::move(r)) {
   }
-  Edge(EdgeType t, Location l, std::unique_ptr<Backref> b) {
-    type = t;
-    loc = l;
-    backref = std::move(b);
-    processed = false;
+
+  Edge(EdgeType t, Location l, std::unique_ptr<Backref> b)
+  : type(t)
+  , loc(std::move(l))
+  , processed(false)
+  , character(0)
+  , backref(std::move(b)) {
   }
 
   // accessors
