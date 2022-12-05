@@ -83,7 +83,7 @@ run_engine(const std::string& regex, const std::string& base_substring,
 
     // build NFA
     NFA nfa;
-    nfa.build(std::move(tree));
+    nfa.build(tree);
     if (debug_mode)
       nfa.print();
     if (stat_mode)
