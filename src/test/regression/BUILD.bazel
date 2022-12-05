@@ -1,0 +1,289 @@
+# Autogenerate test spec
+cc_test(
+    name = "regtest1",
+    srcs = ["regtest1.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest2",
+    srcs = ["regtest2.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest4",
+    srcs = ["regtest4.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest5",
+    srcs = ["regtest5.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest6",
+    srcs = ["regtest6.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest7",
+    srcs = ["regtest7.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest8",
+    srcs = ["regtest8.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest9",
+    srcs = ["regtest9.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest10",
+    srcs = ["regtest10.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest11",
+    srcs = ["regtest11.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest12",
+    srcs = ["regtest12.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest13",
+    srcs = ["regtest13.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest14",
+    srcs = ["regtest14.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest15",
+    srcs = ["regtest15.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest16",
+    srcs = ["regtest16.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest17",
+    srcs = ["regtest17.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest18",
+    srcs = ["regtest18.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest19",
+    srcs = ["regtest19.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest20",
+    srcs = ["regtest20.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest21",
+    srcs = ["regtest21.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest22",
+    srcs = ["regtest22.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest23",
+    srcs = ["regtest23.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest24",
+    srcs = ["regtest24.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest25",
+    srcs = ["regtest25.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest26",
+    srcs = ["regtest26.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest27",
+    srcs = ["regtest27.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest28",
+    srcs = ["regtest28.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest29",
+    srcs = ["regtest29.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# Autogenerate test spec
+cc_test(
+    name = "regtest30",
+    srcs = ["regtest30.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
