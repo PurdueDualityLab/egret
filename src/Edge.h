@@ -46,14 +46,17 @@ typedef enum {
 } EdgeType;
 
 class Edge {
-public:
 
+public:
   static std::shared_ptr<Edge> make_epsilon() {
-    return std::make_shared<Edge>(EPSILON_EDGE);
+    if (!Edge::epsilon) {
+      Edge::epsilon = std::make_shared<Edge>(EPSILON_EDGE);
+    }
+
+    return Edge::epsilon;
   }
 
   // constructors
-  // Edge() { processed = false; }
   explicit Edge(EdgeType t)
   : type(t)
   , loc(std::make_pair(-1, -1))
@@ -75,7 +78,7 @@ public:
   , character(c) {
   }
 
-  Edge(EdgeType t, Location l, std::unique_ptr<CharSet> c)
+  Edge(EdgeType t, Location l, std::shared_ptr<CharSet> c)
   : type(t)
   , loc(std::move(l))
   , processed(false)
@@ -83,7 +86,7 @@ public:
   , char_set(std::move(c)) {
   }
 
-  Edge(EdgeType t, Location l, std::unique_ptr<RegexString> r)
+  Edge(EdgeType t, Location l, std::shared_ptr<RegexString> r)
   : type(t)
   , loc(std::move(l))
   , processed(false)
@@ -91,15 +94,14 @@ public:
   , regex_str(std::move(r)) {
   }
 
-  Edge(EdgeType t, Location l, std::unique_ptr<RegexLoop> r)
+  Edge(EdgeType t, Location l, std::shared_ptr<RegexLoop> r)
   : type(t)
   , loc(std::move(l))
   , processed(false)
   , character(0)
   , regex_loop(std::move(r)) {
   }
-
-  Edge(EdgeType t, Location l, std::unique_ptr<Backref> b)
+  Edge(EdgeType t, Location l, std::shared_ptr<Backref> b)
   : type(t)
   , loc(std::move(l))
   , processed(false)
@@ -110,8 +112,8 @@ public:
   // accessors
   EdgeType get_type() { return type; }
   Location get_loc() { return loc; }
-  char get_character() { return character; }
-  std::unique_ptr<CharSet> &get_charset() {
+  char get_character() const { return character; }
+  std::shared_ptr<CharSet> get_charset() {
     if (type == STRING_EDGE)
       return regex_str->get_charset();
     return char_set;
@@ -154,14 +156,16 @@ public:
   void print();
 
 private:
+  static std::shared_ptr<Edge> epsilon;
+
   EdgeType type;          // type of edge
   Location loc;           // location within original regex
   bool processed;         // set if edge is processed
   char character;         // character (for CHARACTER_EDGE)
-  std::unique_ptr<CharSet> char_set;      // character set (for CHAR_SET_EDGE)
-  std::unique_ptr<RegexString> regex_str; // regex string (for STRING_EDGE)
-  std::unique_ptr<RegexLoop> regex_loop;  // regex loop (for BEGIN_LOOP_EDGE and END_LOOP_EDGE)
-  std::unique_ptr<Backref> backref;       // backreference (for BACKREFERENCE_EDGE)
+  std::shared_ptr<CharSet> char_set;      // character set (for CHAR_SET_EDGE)
+  std::shared_ptr<RegexString> regex_str; // regex string (for STRING_EDGE)
+  std::shared_ptr<RegexLoop> regex_loop;  // regex loop (for BEGIN_LOOP_EDGE and END_LOOP_EDGE)
+  std::shared_ptr<Backref> backref;       // backreference (for BACKREFERENCE_EDGE)
 };
 
 #endif // EDGE_H

@@ -1,0 +1,10 @@
+
+# Autogenerate test spec
+cc_test(
+    name = "{}",
+    srcs = ["{}.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

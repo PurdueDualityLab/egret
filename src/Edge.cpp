@@ -28,6 +28,8 @@
 #include <string>
 #include <vector>
 
+std::shared_ptr<Edge> Edge::epsilon;
+
 bool Edge::process_edge(const std::string &test_string, Path *path) {
   if (type == BEGIN_LOOP_EDGE) {
     regex_loop->set_curr_prefix(test_string);

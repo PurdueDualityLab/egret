@@ -28,7 +28,7 @@ void Backref::gen_min_iter_string(std::string &min_iter_string) {
   min_iter_string.append(get_substring());
 }
 
-std::vector<std::string> Backref::gen_evil_strings(std::string test_string) {
+std::vector<std::string> Backref::gen_evil_strings(const std::string& test_string) {
   std::vector<std::string> evil_strings;
   return evil_strings;
 

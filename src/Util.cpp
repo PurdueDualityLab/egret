@@ -28,7 +28,7 @@
 std::shared_ptr<Util> Util::inst;
 
 std::shared_ptr<Util> Util::get() {
-  if (inst == nullptr)
+  if (!inst)
     inst = std::shared_ptr<Util>(new Util);
   return inst;
 }

@@ -29,7 +29,7 @@
 
 // PATH CONSTRUCTION FUNCTIONS
 
-void Path::append(const std::shared_ptr<Edge> &edge, unsigned int state) {
+void Path::append(const std::shared_ptr<Edge>& edge, unsigned int state) {
   edges.push_back(edge);
   states.push_back(state);
 }
@@ -150,7 +150,7 @@ void Path::check_charsets() {
   for (auto &edge : edges) {
 
     if (edge->get_type() == CHAR_SET_EDGE || edge->get_type() == STRING_EDGE) {
-      auto &charset_ptr = edge->get_charset();
+      auto charset_ptr = edge->get_charset();
       Location loc = edge->get_loc();
 
       // check the character set
@@ -554,8 +554,8 @@ std::string Path::gen_example_string(Location loc, char c, char except) {
       std::string except_str = std::string(1, except);
       if (sub == except_str) {
         if (edge->get_type() == CHAR_SET_EDGE) {
-          char valid_char = edge->get_charset()->get_valid_character(except);
-          example += valid_char;
+          char loc_c = edge->get_charset()->get_valid_character(except);
+          example += loc_c;
         } else {
           example += edge->get_substring();
         }
@@ -650,11 +650,12 @@ Path::gen_evil_strings(const std::set<char> &punct_marks) {
   std::vector<std::string> evil_strings;
 
   // add strings for interesting edges (char sets, strings, and loops)
-  for (unsigned int index : evil_edges) {
+  for (int index : evil_edges) {
     std::vector<std::string> new_strings =
         edges[index]->gen_evil_strings(test_string, punct_marks);
-    for (auto & new_string : new_strings) {
-      evil_strings.push_back(std::move(new_string));
+    std::vector<std::string>::iterator tsi;
+    for (tsi = new_strings.begin(); tsi != new_strings.end(); tsi++) {
+      evil_strings.push_back(*tsi);
     }
   }
   return evil_strings;
