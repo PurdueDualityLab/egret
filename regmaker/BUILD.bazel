@@ -1,0 +1,18 @@
+cc_binary(
+    name = "regmaker",
+    srcs = [
+        "build_file_generator.cc",
+        "build_file_generator.h",
+        "main.cc",
+        "regression_spec.cc",
+        "regression_spec.h",
+        "spec_handler.cc",
+        "spec_handler.h",
+        "test_generator.cc",
+        "test_generator.h",
+    ],
+    deps = [
+        "@com_github_fmtlib_fmt//:fmtlib",
+        "@com_github_nlohmann_json//:json",
+    ],
+)

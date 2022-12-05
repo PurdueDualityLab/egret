@@ -1,0 +1,8 @@
+cc_test(
+    name = "long_slow",
+    srcs = ["long_slow.cc"],
+    deps = [
+        "//src:egret-lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
