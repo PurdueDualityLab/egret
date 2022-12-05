@@ -23,6 +23,7 @@
 #define REGEX_LOOP_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 class RegexLoop {
@@ -34,9 +35,9 @@ public:
   }
 
   // setters
-  void set_prefix(const std::string &p) { prefix = p; }
+  void set_prefix(std::string p) { prefix = std::move(p); }
   void set_substring_from_curr() { substring = curr_substring; }
-  void set_curr_prefix(const std::string &p) { curr_prefix = p; }
+  void set_curr_prefix(std::string p) { curr_prefix = std::move(p); }
   void set_curr_substring(const std::string &test_string);
 
   // getters

@@ -32,7 +32,7 @@ static char *get_arg(int &idx, int argc, char **argv);
 int main(int argc, char *argv[]) {
   cout << "RUNNING PROGRAM" << endl;
   int idx = 1;
-  string regex = "";
+  string regex;
   string base_substring = "evil";
   bool check_mode = false;
   bool web_mode = false;
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     // -r: regular expression
     if (strcmp(arg, "-r") == 0) {
-      if (regex != "") {
+      if (!regex.empty()) {
         cerr << "USAGE: Can only have one regular expression to process"
              << endl;
         return -1;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
         return -1;
       }
 
-      if (regex != "") {
+      if (!regex.empty()) {
         cerr << "USAGE: Can only have one regular expression to process"
              << endl;
         return -1;
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (regex == "") {
+  if (regex.empty()) {
     cerr << "USAGE: Did not find a regular expression to process" << endl;
     return -1;
   }

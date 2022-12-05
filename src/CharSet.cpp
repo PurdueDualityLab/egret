@@ -356,9 +356,7 @@ char CharSet::get_valid_character(char except) {
           return (except != ';') ? ';' : '&';
 #if 0
         case 'D':
-          return (except != 'a') ? 'a' : 'b';
         case 'S':
-          return (except != 'a') ? 'a' : 'b';
         case '.':
           return (except != 'a') ? 'a' : 'b';
 #endif

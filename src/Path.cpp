@@ -23,9 +23,7 @@
 #include "Path.h"
 #include "Edge.h"
 #include "Util.h"
-#include <iostream>
 #include <set>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -489,16 +487,16 @@ void Path::check_digit_too_optional() {
   bool prev_candidate = false;
   Location prev_loc;
 
-  for (unsigned int i = 0; i < edges.size(); i++) {
-    Location curr_loc = edges[i]->get_loc();
-    if (edges[i]->is_zero_repeat_begin()) {
+  for (auto & edge : edges) {
+    Location curr_loc = edge->get_loc();
+    if (edge->is_zero_repeat_begin()) {
       prev_repeat = true;
       prev_candidate = false;
-    } else if (prev_repeat && edges[i]->is_digit_too_optional_candidate()) {
+    } else if (prev_repeat && edge->is_digit_too_optional_candidate()) {
       prev_repeat = false;
       prev_candidate = true;
       prev_loc = curr_loc;
-    } else if (prev_candidate && edges[i]->is_zero_repeat_end()) {
+    } else if (prev_candidate && edge->is_zero_repeat_end()) {
       prev_repeat = false;
       prev_candidate = false;
       std::string example = gen_min_iter_string();
@@ -556,8 +554,8 @@ std::string Path::gen_example_string(Location loc, char c, char except) {
       std::string except_str = std::string(1, except);
       if (sub == except_str) {
         if (edge->get_type() == CHAR_SET_EDGE) {
-          char c = edge->get_charset()->get_valid_character(except);
-          example += c;
+          char loc_c = edge->get_charset()->get_valid_character(except);
+          example += loc_c;
         } else {
           example += edge->get_substring();
         }

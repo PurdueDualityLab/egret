@@ -617,7 +617,7 @@ void ParseTree::gather_stats(const std::shared_ptr<ParseNode> &node, ParseTreeSt
     tree_stats.repeat_nodes++;
     break;
   case GROUP_NODE:
-    if (node->group_name == "")
+    if (node->group_name.empty())
       tree_stats.unnamed_group_nodes++;
     else
       tree_stats.named_group_nodes++;

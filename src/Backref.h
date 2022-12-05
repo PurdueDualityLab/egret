@@ -50,7 +50,7 @@ public:
   void gen_min_iter_string(std::string &min_iter_string);
 
   // generate evil strings
-  std::vector<std::string> gen_evil_strings(std::string test_string);
+  std::vector<std::string> gen_evil_strings(const std::string& test_string);
 
   // print the regex loop
   void print();

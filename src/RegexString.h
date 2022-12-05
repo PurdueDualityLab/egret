@@ -27,6 +27,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 class RegexString {
@@ -39,13 +40,13 @@ public:
   }
 
   // setters
-  void set_prefix(std::string p) { prefix = p; }
-  void set_substring(std::string s) { substring = s; }
+  void set_prefix(std::string p) { prefix = std::move(p); }
+  void set_substring(std::string s) { substring = std::move(s); }
 
   // getters
   std::string get_substring() { return substring; }
-  int get_repeat_lower() { return repeat_lower; }
-  int get_repeat_upper() { return repeat_upper; }
+  int get_repeat_lower() const { return repeat_lower; }
+  int get_repeat_upper() const { return repeat_upper; }
   std::shared_ptr<CharSet> get_charset() { return char_set; }
 
   // property function - used by checker
