@@ -31,18 +31,17 @@
 #include "Path.h"
 #include "Stats.h"
 #include <vector>
-#include <memory>
 
 class NFA {
 
 public:
-  NFA() : size(0), initial(0), final(0) {};
+  NFA() = default;
   NFA(unsigned int _size, unsigned int _initial, unsigned int _final);
   NFA(const NFA &other);
   NFA &operator=(const NFA &other);
 
   // build an NFA from the parse tree
-  void build(ParseTree &&tree);
+  void build(ParseTree &tree);
 
   // create a set of basis paths
   std::vector<Path> find_basis_paths();
@@ -60,40 +59,40 @@ private:
   std::vector<std::vector<std::shared_ptr<Edge>>> edge_table; // edge table
 
   // builds an NFA from tree
-  NFA build_nfa_from_tree(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_from_tree(const std::shared_ptr<ParseNode>& tree);
 
   // builds an alternation of nfa1 and nfa2 (nfa1|nfa2)
-  NFA build_nfa_alternation(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_alternation(const std::shared_ptr<ParseNode> &tree);
 
   // builds a concatenation of nfa1 and nfa2 (nfa1nfa2)
-  NFA build_nfa_concat(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_concat(const std::shared_ptr<ParseNode> &tree);
 
   // builds nfa{m,n}
-  NFA build_nfa_repeat(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_repeat(const std::shared_ptr<ParseNode> &tree);
 
   // builds special node for regex strings such as .+ or \w*
-  NFA build_nfa_string(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_string(const std::shared_ptr<ParseNode> &tree);
 
   // builds (nfa)
-  NFA build_nfa_group(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_group(const std::shared_ptr<ParseNode> &tree);
 
   // builds nfa with character
-  NFA build_nfa_character(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_character(const std::shared_ptr<ParseNode> &tree);
 
   // builds nfa with caret
-  NFA build_nfa_caret(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_caret(const std::shared_ptr<ParseNode> &tree);
 
   // builds nfa with dollar
-  NFA build_nfa_dollar(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_dollar(const std::shared_ptr<ParseNode> &tree);
 
   // builds nfa with char set as input
-  NFA build_nfa_char_set(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_char_set(const std::shared_ptr<ParseNode> &tree);
 
   // builds nfa with ignored element
-  NFA build_nfa_ignored();
+  NFA build_nfa_ignored(const std::shared_ptr<ParseNode> &tree);
 
   // builds nfa with backreference
-  NFA build_nfa_backreference(std::unique_ptr<ParseNode> tree);
+  NFA build_nfa_backreference(const std::shared_ptr<ParseNode> &tree);
 
   // adds an edge to edge table
   void add_edge(unsigned int from, unsigned int to, const std::shared_ptr<Edge> &edge);
@@ -112,7 +111,7 @@ private:
   void append_empty_state();
 
   // returns true if repeat quantifier represents a string
-  bool is_regex_string(const std::unique_ptr<ParseNode> &node, int repeat_lower, int repeat_upper);
+  bool is_regex_string(const std::shared_ptr<ParseNode> &node, int repeat_lower, int repeat_upper);
 
   // utility function to find all paths through the NFA
   void traverse(unsigned int curr_state, Path path, std::vector<Path> &paths,

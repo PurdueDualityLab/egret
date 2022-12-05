@@ -31,13 +31,13 @@ class Path {
 
 public:
   Path() = default;
-  explicit Path(unsigned int initial) { states.push_back(initial); }
+  Path(unsigned int initial) { states.push_back(initial); }
   std::string get_test_string() { return test_string; }
 
   // PATH CONSTRUCTION FUNCTIONS
 
   // adds an edge and the destination state to the path
-  void append(const std::shared_ptr<Edge> &edge, unsigned int state);
+  void append(const std::shared_ptr<Edge>& edge, unsigned int state);
 
   // removes the last edge and state
   void remove_last();

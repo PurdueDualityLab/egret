@@ -89,8 +89,8 @@
 #include <cassert>
 #include <set>
 #include <unordered_map>
-#include <utility>
 #include <memory>
+#include <utility>
 
 typedef enum {
   ALTERNATION_NODE,
@@ -106,68 +106,65 @@ typedef enum {
 } NodeType;
 
 struct ParseNode {
-  ParseNode(NodeType t, Location loc)
-  : type(t)
-  , loc(std::move(loc))
-  , left()
-  , right()
-  , char_set()
-  {}
-
-  ParseNode(NodeType t, Location _loc, std::unique_ptr<ParseNode> l, std::unique_ptr<ParseNode> r)
+  ParseNode(NodeType t, Location _loc, std::shared_ptr<ParseNode> l, std::shared_ptr<ParseNode> r)
   : type(t)
   , loc(std::move(_loc))
   , left(std::move(l))
   , right(std::move(r))
-  , char_set() {
+  , character(0)
+  , repeat_lower(-1)
+  , repeat_upper(-1) {
   }
 
-  ParseNode(NodeType t, Location _loc, std::string _name, std::unique_ptr<ParseNode> l,
-            std::unique_ptr<ParseNode> r)
+  ParseNode(NodeType t, Location _loc, std::string _name, std::shared_ptr<ParseNode> l,
+            std::shared_ptr<ParseNode> r)
   : type(t)
   , loc(std::move(_loc))
   , left(std::move(l))
   , right(std::move(r))
-  , char_set()
+  , character(0)
+  , repeat_lower(-1)
+  , repeat_upper(-1)
   , group_name(std::move(_name)) {
     assert(t == GROUP_NODE);
   }
 
-  ParseNode(NodeType t, Location _loc, std::unique_ptr<CharSet> c)
+  ParseNode(NodeType t, Location _loc, std::shared_ptr<CharSet> c)
   : type(t)
   , loc(std::move(_loc))
   , left()
   , right()
-  , char_set(std::move(c)) {
+  , character(0)
+  , char_set(std::move(c))
+  , repeat_lower(-1)
+  , repeat_upper(-1) {
     assert(t == CHAR_SET_NODE);
   }
 
   ParseNode(NodeType t, Location _loc, char c)
   : type(t)
   , loc(std::move(_loc))
-  , left()
-  , right()
   , character(c)
-  , char_set() {
+  , repeat_lower(-1)
+  , repeat_upper(-1) {
     assert(t == CHARACTER_NODE);
   }
 
-  ParseNode(NodeType t, Location _loc, std::unique_ptr<Backref> b)
+  ParseNode(NodeType t, Location _loc, std::shared_ptr<Backref> b)
   : type(t)
   , loc(std::move(_loc))
-  , left()
-  , right()
-  , char_set()
+  , character(0)
+  , repeat_lower(-1)
+  , repeat_upper(-1)
   , backref(std::move(b)) {
     assert(t == BACKREFERENCE_NODE);
   }
 
-  ParseNode(NodeType t, Location _loc, std::unique_ptr<ParseNode> l, int lower, int upper)
+  ParseNode(NodeType t, Location _loc, std::shared_ptr<ParseNode> l, int lower, int upper)
   : type(t)
   , loc(std::move(_loc))
   , left(std::move(l))
-  , right()
-  , char_set()
+  , character(0)
   , repeat_lower(lower)
   , repeat_upper(upper) {
     assert(t == REPEAT_NODE);
@@ -175,13 +172,13 @@ struct ParseNode {
 
   NodeType type;
   Location loc;
-  std::unique_ptr<ParseNode> left;
-  std::unique_ptr<ParseNode> right;
-  char character{};         // For CHARACTER_NODE
-  std::unique_ptr<CharSet> char_set;      // For CHAR_SET_NODE
-  int repeat_lower{};       // For REPEAT_NODE
-  int repeat_upper{};       // For REPEAT_NODE (-1 for no limit)
-  std::unique_ptr<Backref> backref;       // For BACKREFERENCE_NODE
+  std::shared_ptr<ParseNode> left;
+  std::shared_ptr<ParseNode> right;
+  char character;         // For CHARACTER_NODE
+  std::shared_ptr<CharSet> char_set;      // For CHAR_SET_NODE
+  int repeat_lower;       // For REPEAT_NODE
+  int repeat_upper;       // For REPEAT_NODE (-1 for no limit)
+  std::shared_ptr<Backref> backref;       // For BACKREFERENCE_NODE
   std::string group_name; // For GROUP_NODE
 };
 
@@ -192,7 +189,7 @@ public:
   void build(Scanner &_scanner);
 
   // get root of the tree
-  std::unique_ptr<ParseNode> &get_root() { return root; }
+  std::shared_ptr<ParseNode> get_root() { return root; }
 
   // get set of punctuation marks
   std::set<char> get_punct_marks() { return punct_marks; }
@@ -204,7 +201,7 @@ public:
   void add_stats(Stats &stats);
 
 private:
-  std::unique_ptr<ParseNode> root;            // root of parse tree
+  std::shared_ptr<ParseNode> root;            // root of parse tree
   Scanner scanner;            // scanner
   std::set<char> punct_marks; // set of punctuation marks
   std::unordered_map<int, Location> group_locs;
@@ -212,22 +209,22 @@ private:
   int group_count;
 
   // creation functions
-  std::unique_ptr<ParseNode> expr();
-  std::unique_ptr<ParseNode> concat();
-  std::unique_ptr<ParseNode> rep();
-  std::unique_ptr<ParseNode> atom();
-  std::unique_ptr<ParseNode> group();
-  std::unique_ptr<ParseNode> character();
-  std::unique_ptr<ParseNode> char_class();
-  std::unique_ptr<ParseNode> char_set();
-  std::unique_ptr<ParseNode> char_list(int start_loc);
+  std::shared_ptr<ParseNode> expr();
+  std::shared_ptr<ParseNode> concat();
+  std::shared_ptr<ParseNode> rep();
+  std::shared_ptr<ParseNode> atom();
+  std::shared_ptr<ParseNode> group();
+  std::shared_ptr<ParseNode> character();
+  std::shared_ptr<ParseNode> char_class();
+  std::shared_ptr<ParseNode> char_set();
+  std::shared_ptr<ParseNode> char_list(int start_loc);
   CharSetItem list_item();
   CharSetItem character_item();
   CharSetItem char_class_item();
   CharSetItem char_range_item();
 
   // print the tree
-  void print_tree(const std::unique_ptr<ParseNode> &node, unsigned offset);
+  void print_tree(const std::shared_ptr<ParseNode> &node, unsigned offset);
 
   // gather stats
   struct ParseTreeStats {
@@ -244,7 +241,7 @@ private:
     int complement_char_set_nodes;
     int ignored_nodes;
   };
-  void gather_stats(const std::unique_ptr<ParseNode> &node, ParseTreeStats &tree_stats);
+  void gather_stats(const std::shared_ptr<ParseNode> &node, ParseTreeStats &tree_stats);
 };
 
 #endif // PARSE_TREE_H

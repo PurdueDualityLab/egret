@@ -14,10 +14,6 @@ cc_library(
 
 cc_binary(
     name = "egret",
-    srcs = [
-        "main.cpp",
-    ],
-    deps = [
-        ":egret-lib",
-    ],
+    srcs = ["main.cpp"],
+    deps = [":egret-lib"],
 )

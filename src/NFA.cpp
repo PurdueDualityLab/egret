@@ -29,27 +29,22 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
-#include <memory>
+
+// TODO: No location information for epsilon edge.  OK?
 
 NFA::NFA(unsigned int _size, unsigned int _initial, unsigned int _final)
 : size(_size)
 , initial(_initial)
 , final(_final) {
-
-  assert(this->initial < this->size);
-  assert(this->final < this->size);
+  assert(initial < size);
+  assert(final < size);
 
   // initialize edge table with an "empty graph"
   std::vector<std::shared_ptr<Edge>> empty_row(size);
-  for (unsigned int i = 0; i < this->size; i++) {
-    // edge_table.push_back(empty_row));
-    edge_table.emplace_back(size);
+  for (unsigned int i = 0; i < size; i++) {
+    edge_table.push_back(empty_row);
   }
 }
-
-/*
- * TODO(cs): rule of zero: try to not explicitly define these ctors...
- */
 
 NFA::NFA(const NFA &other) {
   size = other.size;
@@ -70,9 +65,9 @@ NFA &NFA::operator=(const NFA &other) {
   return *this;
 }
 
-void NFA::build(ParseTree &&tree) {
+void NFA::build(ParseTree &tree) {
   // Build NFA
-  NFA nfa = build_nfa_from_tree(std::move(tree.get_root()));
+  NFA nfa = build_nfa_from_tree(tree.get_root());
 
   // Copy NFA
   initial = nfa.initial;
@@ -81,49 +76,49 @@ void NFA::build(ParseTree &&tree) {
   edge_table = nfa.edge_table;
 }
 
-NFA NFA::build_nfa_from_tree(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_from_tree(const std::shared_ptr<ParseNode>& tree) {
   assert(tree);
 
   switch (tree->type) {
 
   case ALTERNATION_NODE:
-    return build_nfa_alternation(std::move(tree));
+    return build_nfa_alternation(tree);
 
   case CONCAT_NODE:
-    return build_nfa_concat(std::move(tree));
+    return build_nfa_concat(tree);
 
   case REPEAT_NODE:
-    return build_nfa_repeat(std::move(tree));
+    return build_nfa_repeat(tree);
 
   case GROUP_NODE:
-    return build_nfa_group(std::move(tree));
+    return build_nfa_group(tree);
 
   case CHARACTER_NODE:
-    return build_nfa_character(std::move(tree));
+    return build_nfa_character(tree);
 
   case CARET_NODE:
-    return build_nfa_caret(std::move(tree));
+    return build_nfa_caret(tree);
 
   case DOLLAR_NODE:
-    return build_nfa_dollar(std::move(tree));
+    return build_nfa_dollar(tree);
 
   case CHAR_SET_NODE:
-    return build_nfa_char_set(std::move(tree));
+    return build_nfa_char_set(tree);
 
   case IGNORED_NODE:
-    return build_nfa_ignored();
+    return build_nfa_ignored(tree);
 
   case BACKREFERENCE_NODE:
-    return build_nfa_backreference(std::move(tree));
+    return build_nfa_backreference(tree);
 
   default:
     throw EgretException("ERROR (internal): Invalid node type in parse tree");
   }
 }
 
-NFA NFA::build_nfa_alternation(std::unique_ptr<ParseNode> tree) {
-  NFA nfa1 = build_nfa_from_tree(std::move(tree->left));
-  NFA nfa2 = build_nfa_from_tree(std::move(tree->right));
+NFA NFA::build_nfa_alternation(const std::shared_ptr<ParseNode> & tree) {
+  NFA nfa1 = build_nfa_from_tree(tree->left);
+  NFA nfa2 = build_nfa_from_tree(tree->right);
 
   // How this is done: the new nfa must contain all the states in
   // nfa1 and nfa2, plus new initial and final states.
@@ -158,22 +153,22 @@ NFA NFA::build_nfa_alternation(std::unique_ptr<ParseNode> tree) {
   return new_nfa;
 }
 
-NFA NFA::build_nfa_concat(std::unique_ptr<ParseNode> tree) {
-  NFA nfa1 = build_nfa_from_tree(std::move(tree->left));
-  NFA nfa2 = build_nfa_from_tree(std::move(tree->right));
+NFA NFA::build_nfa_concat(const std::shared_ptr<ParseNode> &tree) {
+  NFA nfa1 = build_nfa_from_tree(tree->left);
+  NFA nfa2 = build_nfa_from_tree(tree->right);
   return concat_nfa(nfa1, nfa2);
 }
 
-NFA NFA::build_nfa_repeat(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_repeat(const std::shared_ptr<ParseNode> &tree) {
   int repeat_lower = tree->repeat_lower;
   int repeat_upper = tree->repeat_upper;
 
   // if repeat represents a string, build a regex string instead
   if (is_regex_string(tree->left, repeat_lower, repeat_upper))
-    return build_nfa_string(std::move(tree));
+    return build_nfa_string(tree);
 
   // create NFA for repeated segment
-  NFA nfa = build_nfa_from_tree(std::move(tree->left));
+  NFA nfa = build_nfa_from_tree(tree->left);
 
   // make room for the new initial state
   nfa.shift_states(1);
@@ -182,15 +177,16 @@ NFA NFA::build_nfa_repeat(std::unique_ptr<ParseNode> tree) {
   nfa.append_empty_state();
 
   // create new loop
-  // TODO refactor this
   // RegexLoop *regex_loop = new RegexLoop(repeat_lower, repeat_upper);
-  auto regex_loop = std::make_unique<RegexLoop>(repeat_lower, repeat_upper);
+  auto regex_loop = std::make_shared<RegexLoop>(repeat_lower, repeat_upper);
 
   // Util new edges
   // Edge *edge = new Edge(BEGIN_LOOP_EDGE, tree->loc, regex_loop);
-  nfa.add_edge(0, nfa.initial, std::make_shared<Edge>(BEGIN_LOOP_EDGE, tree->loc, std::move(regex_loop))); // new initial to old initial
+  auto edge = std::make_shared<Edge>(BEGIN_LOOP_EDGE, tree->loc, regex_loop);
+  nfa.add_edge(0, nfa.initial, edge); // new initial to old initial
   // edge = new Edge(END_LOOP_EDGE, tree->loc, regex_loop);
-  nfa.add_edge(nfa.final, nfa.size - 1, std::make_shared<Edge>(END_LOOP_EDGE, tree->loc, std::move(regex_loop))); // old final to new final
+  edge = std::make_shared<Edge>(END_LOOP_EDGE, tree->loc, regex_loop);
+  nfa.add_edge(nfa.final, nfa.size - 1, edge); // old final to new final
 
   // update states
   nfa.initial = 0;
@@ -199,61 +195,64 @@ NFA NFA::build_nfa_repeat(std::unique_ptr<ParseNode> tree) {
   return nfa;
 }
 
-NFA NFA::build_nfa_string(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_string(const std::shared_ptr<ParseNode> &tree) {
   NFA nfa(2, 0, 1);
-  // TODO fix this
   // RegexString *regex_str = new RegexString(
-  //     std::move(tree->left->char_set), tree->repeat_lower, tree->repeat_upper);
-  auto regex_str = std::make_unique<RegexString>(std::move(tree->left->char_set), tree->repeat_lower, tree->repeat_upper);
+  //     tree->left->char_set, tree->repeat_lower, tree->repeat_upper);
+  auto regex_str = std::make_shared<RegexString>(tree->left->char_set, tree->repeat_lower, tree->repeat_upper);
   Location loc = std::make_pair(tree->left->loc.first, tree->loc.second);
   // Edge *edge = new Edge(STRING_EDGE, loc, regex_str);
-  nfa.add_edge(0, 1, std::make_shared<Edge>(STRING_EDGE, loc, std::move(regex_str)));
+  auto edge = std::make_shared<Edge>(STRING_EDGE, loc, std::move(regex_str));
+  nfa.add_edge(0, 1, edge);
 
   return nfa;
 }
 
-NFA NFA::build_nfa_group(std::unique_ptr<ParseNode> tree) {
-  return build_nfa_from_tree(std::move(tree->left));
+NFA NFA::build_nfa_group(const std::shared_ptr<ParseNode> &tree) {
+  return build_nfa_from_tree(tree->left);
 }
 
-NFA NFA::build_nfa_character(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_character(const std::shared_ptr<ParseNode> &tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   // Edge *edge = new Edge(CHARACTER_EDGE, tree->loc, tree->character);
-  nfa.add_edge(0, 1, std::make_shared<Edge>(CHARACTER_EDGE, tree->loc, tree->character));
+  auto edge = std::make_shared<Edge>(CHARACTER_EDGE, tree->loc, tree->character);
+  nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-NFA NFA::build_nfa_caret(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_caret(const std::shared_ptr<ParseNode> &tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   // Edge *edge = new Edge(CARET_EDGE, tree->loc);
-  nfa.add_edge(0, 1, std::make_shared<Edge>(CARET_EDGE, tree->loc));
+  auto edge = std::make_shared<Edge>(CARET_EDGE, tree->loc);
+  nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-NFA NFA::build_nfa_dollar(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_dollar(const std::shared_ptr<ParseNode> &tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   // Edge *edge = new Edge(DOLLAR_EDGE, tree->loc);
   nfa.add_edge(0, 1, std::make_shared<Edge>(DOLLAR_EDGE, tree->loc));
   return nfa;
 }
 
-NFA NFA::build_nfa_char_set(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_char_set(const std::shared_ptr<ParseNode> &tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
   // Edge *edge = new Edge(CHAR_SET_EDGE, tree->loc, tree->char_set);
-  nfa.add_edge(0, 1, std::make_shared<Edge>(CHAR_SET_EDGE, tree->loc, std::move(tree->char_set)));
+  auto edge = std::make_shared<Edge>(CHAR_SET_EDGE, tree->loc, tree->char_set);
+  nfa.add_edge(0, 1, edge);
   return nfa;
 }
 
-NFA NFA::build_nfa_ignored() {
+NFA NFA::build_nfa_ignored(const std::shared_ptr<ParseNode> &tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0 , final = 1
   nfa.add_edge(0, 1, Edge::make_epsilon());
   return nfa;
 }
 
-NFA NFA::build_nfa_backreference(std::unique_ptr<ParseNode> tree) {
+NFA NFA::build_nfa_backreference(const std::shared_ptr<ParseNode> &tree) {
   NFA nfa(2, 0, 1); // size = 2, initial = 0, final = 1
   // Edge *edge = new Edge(BACKREFERENCE_EDGE, tree->loc, tree->backref);
-  auto edge = std::make_shared<Edge>(BACKREFERENCE_EDGE, tree->loc, std::move(tree->backref));
+  auto edge = std::make_shared<Edge>(BACKREFERENCE_EDGE, tree->loc, tree->backref);
   nfa.add_edge(0, 1, edge);
   return nfa;
 }
@@ -329,12 +328,12 @@ void NFA::append_empty_state() {
 
   // append a new column
   for (unsigned int i = 0; i < size; i++)
-    edge_table[i].push_back(nullptr);
+    edge_table[i].emplace_back();
 
   size += 1;
 }
 
-bool NFA::is_regex_string(const std::unique_ptr<ParseNode> &node, int repeat_lower, int repeat_upper) {
+bool NFA::is_regex_string(const std::shared_ptr<ParseNode> &node, int repeat_lower, int repeat_upper) {
   // Conditions for a string:
   // - Must be a repeated character set node
   // - Must be a * or + meaning that lower is 0 or 1, upper is -1 (no limit)
